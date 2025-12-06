@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
@@ -14,6 +15,7 @@ from ringtwice.config import Config, get_default_config_path
 from ringtwice.llm import LLMClient
 from ringtwice.mailbox import Email, SearchCriteria, create_backend
 from ringtwice.output import OutputWriter, get_default_output_dir
+from ringtwice.pipeline import PipelineCallbacks, PipelineStats, run_pipeline
 from ringtwice.processor import EmailProcessor
 
 if TYPE_CHECKING:
@@ -262,3 +264,99 @@ class RunCallbacks:
     on_process_progress: Callable[[], None] = lambda: None
     on_write: Callable[[Path], None] = lambda path: None
     on_process_end: Callable[[Path], None] = lambda out_dir: None
+
+
+@dataclass
+class AsyncRunCallbacks:
+    """Callbacks for run_ask_async progress reporting with concurrent updates."""
+
+    on_fetch_start: Callable[[], None] = lambda: None
+    on_fetch_progress: Callable[[int, str], None] = lambda count, mailbox: None
+    on_fetch_complete: Callable[[int], None] = lambda total: None
+    on_fetch_error: Callable[[Exception, str], None] = lambda e, mailbox: None
+
+    on_process_start: Callable[[], None] = lambda: None
+    on_process_progress: Callable[[int, int], None] = lambda processed, queued: None
+    on_process_complete: Callable[[int], None] = lambda total: None
+    on_process_error: Callable[[Exception, list[Email]], None] = lambda e, emails: None
+
+    on_write: Callable[[Path, int], None] = lambda path, email_count: None
+    on_stats_update: Callable[[PipelineStats], None] = lambda stats: None
+    on_no_emails: Callable[[], None] = lambda: None
+    on_complete: Callable[[Path, PipelineStats], None] = lambda out_dir, stats: None
+
+
+async def run_ask_async(
+    params: AskParams, callbacks: AsyncRunCallbacks | None = None
+) -> tuple[Path, PipelineStats]:
+    """
+    Run the ask command using the async producer-consumer pipeline.
+
+    This version fetches emails concurrently with LLM processing,
+    providing better throughput and real-time output.
+
+    Returns:
+        Tuple of (output directory path, pipeline statistics)
+    """
+    cb = callbacks or AsyncRunCallbacks()
+    load_dotenv()
+
+    config_path = params.config_file or get_default_config_path()
+    config = Config.load(config_path)
+
+    out_dir = params.output_dir or get_default_output_dir()
+    writer = OutputWriter(out_dir)
+    llm = LLMClient(config.llm)
+    processor = EmailProcessor()
+
+    criteria = build_search_criteria(params)
+    mailbox_configs = resolve_mailboxes(config, params.boxes)
+
+    # Convert callbacks to pipeline format
+    pipeline_callbacks = PipelineCallbacks(
+        on_fetch_start=cb.on_fetch_start,
+        on_fetch_progress=cb.on_fetch_progress,
+        on_fetch_complete=cb.on_fetch_complete,
+        on_fetch_error=cb.on_fetch_error,
+        on_process_start=cb.on_process_start,
+        on_process_progress=cb.on_process_progress,
+        on_process_complete=cb.on_process_complete,
+        on_process_error=cb.on_process_error,
+        on_write=cb.on_write,
+        on_stats_update=cb.on_stats_update,
+    )
+
+    # Run the pipeline
+    stats = await run_pipeline(
+        mailbox_configs=mailbox_configs,
+        criteria=criteria,
+        llm=llm,
+        writer=writer,
+        processor=processor,
+        parse_query=params.parse_query,
+        thread=params.thread,
+        max_emails=params.max_emails,
+        batch=params.batch,
+        batch_size=params.batch_size,
+        buffer_multiplier=20,  # Buffer 20x LLM context worth of emails
+        num_workers=1,  # Single worker for LLM (rate limiting)
+        callbacks=pipeline_callbacks,
+    )
+
+    if stats.emails_fetched == 0:
+        cb.on_no_emails()
+
+    cb.on_complete(out_dir, stats)
+
+    return out_dir, stats
+
+
+def run_ask_with_pipeline(
+    params: AskParams, callbacks: AsyncRunCallbacks | None = None
+) -> tuple[Path, PipelineStats]:
+    """
+    Synchronous wrapper for run_ask_async.
+
+    Use this when you want the new pipeline behavior from sync code.
+    """
+    return asyncio.run(run_ask_async(params, callbacks))

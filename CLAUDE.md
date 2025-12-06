@@ -31,6 +31,8 @@ pytest --cov=src --cov-report=term-missing --cov-fail-under=80
 uv run ringtwice --help
 ```
 
+You can also run `./build.sh` 
+
 ## Project Layout
 
 ```

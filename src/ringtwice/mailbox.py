@@ -151,8 +151,7 @@ class GmailBackend(MailboxBackend):
         if not self._credentials_file.exists():
             raise FileNotFoundError(
                 f"Gmail credentials not found: {self._credentials_file}\n\n"
-                "To set up Gmail access, see: GMAIL.md\n"
-                "Or run: open https://github.com/yourname/ringtwice/blob/main/GMAIL.md"
+                "To set up Gmail access, see: https://twardoch.github.io/ringtwice/gmail/\n"
             )
         self._service = self._build_service()
 
