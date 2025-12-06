@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import contextlib
 import json
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
 
 import fire
 from rich.console import Console

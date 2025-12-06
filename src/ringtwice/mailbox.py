@@ -8,10 +8,10 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
-from imap_tools.mailbox import MailBox as IMAPToolsMailBox  # type: ignore[import-untyped]
-from imap_tools.query import AND  # type: ignore[import-untyped]
+from imap_tools.mailbox import MailBox as IMAPToolsMailBox
+from imap_tools.query import AND
 
 if TYPE_CHECKING:
     from ringtwice.config import MailboxConfig
@@ -93,29 +93,42 @@ class IMAPBackend(MailboxBackend):
 
     def _build_criteria(self, criteria: SearchCriteria) -> AND:
         """Convert SearchCriteria to imap-tools query."""
-        parts: dict[str, str | date] = {}
         text_parts: list[str] = []
+        from_part: str | None = None
+        to_part: str | None = None
+        subject_part = criteria.subject
+        date_gte_part: date | None = None
+        date_lt_part: date | None = None
+
         if criteria.query:
             text_parts.append(criteria.query)
         if criteria.sender:
             if len(criteria.sender) == 1:
-                parts["from_"] = criteria.sender[0]
+                from_part = criteria.sender[0]
             else:
                 text_parts.extend(criteria.sender)
-        if criteria.subject:
-            parts["subject"] = criteria.subject
         if criteria.recipient:
             if len(criteria.recipient) == 1:
-                parts["to"] = criteria.recipient[0]
+                to_part = criteria.recipient[0]
             else:
                 text_parts.extend(criteria.recipient)
         if criteria.date_from:
-            parts["date_gte"] = criteria.date_from.date()
+            date_gte_part = criteria.date_from.date()
         if criteria.date_to:
-            parts["date_lt"] = criteria.date_to.date()
-        if text_parts:
-            parts["text"] = " OR ".join(text_parts)
-        return AND(**parts) if parts else AND(all=True)
+            date_lt_part = criteria.date_to.date()
+        text_part: str | None = " OR ".join(text_parts) if text_parts else None
+
+        if not any([text_part, from_part, to_part, subject_part, date_gte_part, date_lt_part]):
+            return AND(all=True)
+
+        return AND(
+            text=text_part,
+            from_=from_part,
+            subject=subject_part,
+            to=to_part,
+            date_gte=date_gte_part,
+            date_lt=date_lt_part,
+        )
 
     def get_thread(self, email: Email) -> list[Email]:
         """IMAP doesn't have native threading - return single email."""
@@ -145,23 +158,23 @@ class GmailBackend(MailboxBackend):
 
     def _build_service(self) -> Any:
         """Build Gmail API service with OAuth."""
-        from google.oauth2.credentials import Credentials  # type: ignore[import-untyped]
-        from google_auth_oauthlib.flow import InstalledAppFlow  # type: ignore[import-untyped]
-        from googleapiclient.discovery import build  # type: ignore[import-untyped]
+        from google.oauth2.credentials import Credentials
+        from google_auth_oauthlib.flow import InstalledAppFlow
+        from googleapiclient.discovery import build
 
         # Store token next to credentials file
         token_path = self._credentials_file.parent / "gmail_token.json"
 
         creds: Any = None
         if token_path.exists():
-            creds = Credentials.from_authorized_user_file(str(token_path), self.SCOPES)
+            creds = cast(Any, Credentials).from_authorized_user_file(str(token_path), self.SCOPES)
 
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 # Try to refresh expired token
-                from google.auth.transport.requests import Request  # type: ignore[import-untyped]
+                from google.auth.transport.requests import Request
 
-                creds.refresh(Request())
+                creds.refresh(cast(Any, Request)())
             else:
                 # Run OAuth flow - opens browser
                 flow = InstalledAppFlow.from_client_secrets_file(
@@ -175,21 +188,32 @@ class GmailBackend(MailboxBackend):
     def search(self, criteria: SearchCriteria, folders: list[str]) -> Iterator[Email]:
         """Search Gmail using API query syntax."""
         query = self._build_query(criteria, folders)
-        results = (
-            self._service.users()
-            .messages()
-            .list(userId="me", q=query)
-            .execute()
-        )
+        page_token: str | None = None
 
-        for msg_stub in results.get("messages", []):
-            msg = (
-                self._service.users()
-                .messages()
-                .get(userId="me", id=msg_stub["id"], format="full")
-                .execute()
-            )
-            yield self._parse_message(msg)
+        while True:
+            # Build request with optional page token
+            request = self._service.users().messages().list(userId="me", q=query)
+            if page_token:
+                request = (
+                    self._service.users()
+                    .messages()
+                    .list(userId="me", q=query, pageToken=page_token)
+                )
+            results = request.execute()
+
+            for msg_stub in results.get("messages", []):
+                msg = (
+                    self._service.users()
+                    .messages()
+                    .get(userId="me", id=msg_stub["id"], format="full")
+                    .execute()
+                )
+                yield self._parse_message(msg)
+
+            # Check for more pages
+            page_token = results.get("nextPageToken")
+            if not page_token:
+                break
 
     def _build_query(self, criteria: SearchCriteria, folders: list[str]) -> str:
         """Build Gmail search query string."""
@@ -268,12 +292,7 @@ class GmailBackend(MailboxBackend):
         """Get full Gmail thread."""
         if not email.thread_id:
             return [email]
-        thread = (
-            self._service.users()
-            .threads()
-            .get(userId="me", id=email.thread_id)
-            .execute()
-        )
+        thread = self._service.users().threads().get(userId="me", id=email.thread_id).execute()
         return [self._parse_message(msg) for msg in thread.get("messages", [])]
 
     def close(self) -> None:
