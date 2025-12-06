@@ -1,0 +1,24 @@
+# Ringtwice Configuration
+#
+# Location (find yours with: python -c "from platformdirs import user_config_dir; print(user_config_dir('ringtwice'))")
+#   macOS:   ~/Library/Application Support/ringtwice/config.toml
+#   Linux:   ~/.config/ringtwice/config.toml
+#   Windows: %APPDATA%\ringtwice\config.toml
+
+[llm]
+# LLM API endpoint (OpenAI-compatible)
+endpoint = "${LLM_API_ENDPOINT}"  # e.g., "https://api.cerebras.ai/v1"
+api_key = "${LLM_API_KEY}"
+model = "llama-3.1-70b"
+max_context = 8192
+
+[mailbox.gmail]
+type = "gmail"
+credentials_file = "gmail_credentials.json"  # relative to this config file's directory
+
+[mailbox.work]
+type = "imap"
+host = "imap.example.com"
+port = 993
+username = "${IMAP_USER}"
+password = "${IMAP_PASSWORD}"

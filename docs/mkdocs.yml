@@ -1,0 +1,66 @@
+site_name: ringtwice
+site_url: https://twardoch.github.io/ringtwice
+site_description: CLI tool to process emails with LLMs
+site_author: Adam Twardoch
+
+repo_url: https://github.com/twardoch/ringtwice
+repo_name: twardoch/ringtwice
+edit_uri: edit/main/
+
+docs_dir: .
+site_dir: docs
+
+nav:
+  - Home: README.md
+  - Gmail Setup: GMAIL.md
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/twardoch/ringtwice
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/ringtwice/

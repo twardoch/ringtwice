@@ -7,7 +7,7 @@ on:
       - "docs/**"
       - "README.md"
       - "GMAIL.md"
-      - "zensical.yaml"
+      - "mkdocs.yml"
       - ".github/workflows/docs.yml"
   pull_request:
     branches: [main]
@@ -15,7 +15,7 @@ on:
       - "docs/**"
       - "README.md"
       - "GMAIL.md"
-      - "zensical.yaml"
+      - "mkdocs.yml"
       - ".github/workflows/docs.yml"
   workflow_dispatch:
 
