@@ -26,7 +26,7 @@ def make_email(
     )
 
 
-def make_response(content: str = "Response text") -> LLMResponse:
+def make_response(content: str = "This is a meaningful response with enough content") -> LLMResponse:
     """Helper to create test responses."""
     return LLMResponse(
         content=content,
@@ -131,7 +131,8 @@ class TestOutputWriter:
         """Test written content is valid JSONL."""
         writer = OutputWriter(tmp_path)
         email = make_email()
-        response = make_response("Test response")
+        content = "This is a meaningful test response with enough characters"
+        response = make_response(content)
 
         filepath = writer.write(email, response)
 
@@ -141,15 +142,15 @@ class TestOutputWriter:
 
         assert data["email"]["uid"] == "1"
         assert data["email"]["subject"] == "Test Subject"
-        assert data["response"]["content"] == "Test response"
+        assert data["response"]["content"] == content
         assert "timestamp" in data
 
     def test_write_appends_to_file(self, tmp_path: Path) -> None:
         """Test multiple writes append to same file."""
         writer = OutputWriter(tmp_path)
         email = make_email()
-        response1 = make_response("First")
-        response2 = make_response("Second")
+        response1 = make_response("First meaningful response with enough content to pass filter")
+        response2 = make_response("Second meaningful response with enough content to pass filter")
 
         filepath1 = writer.write(email, response1)
         filepath2 = writer.write(email, response2)
@@ -197,3 +198,64 @@ class TestOutputWriter:
         filepath = writer.write_batch([], response)
 
         assert filepath.name == "batch.jsonl"
+
+    def test_write_skips_empty_response(self, tmp_path: Path) -> None:
+        """Test write returns None and doesn't create file for empty response."""
+        writer = OutputWriter(tmp_path)
+        email = make_email()
+        response = make_response("")  # Empty response
+
+        result = writer.write(email, response)
+
+        assert result is None
+        assert writer.skipped_count == 1
+
+    def test_write_skips_short_response(self, tmp_path: Path) -> None:
+        """Test write returns None for very short responses."""
+        writer = OutputWriter(tmp_path)
+        email = make_email()
+        response = make_response("Short")  # Too short
+
+        result = writer.write(email, response)
+
+        assert result is None
+        assert writer.skipped_count == 1
+
+    def test_write_skips_no_results_response(self, tmp_path: Path) -> None:
+        """Test write returns None for 'no results found' type responses."""
+        writer = OutputWriter(tmp_path)
+        email = make_email()
+        response = make_response("(no software orders with serial numbers found)")
+
+        result = writer.write(email, response)
+
+        assert result is None
+        assert writer.skipped_count == 1
+
+    def test_write_includes_recipients(self, tmp_path: Path) -> None:
+        """Test write includes recipients in JSONL output."""
+        writer = OutputWriter(tmp_path)
+        email = make_email()
+        response = make_response()
+
+        filepath = writer.write(email, response)
+
+        with filepath.open() as f:
+            data = json.loads(f.readline())
+
+        assert "recipients" in data["email"]
+        assert data["email"]["recipients"] == ["me@example.com"]
+
+    def test_write_batch_includes_recipients(self, tmp_path: Path) -> None:
+        """Test write_batch includes recipients for all emails."""
+        writer = OutputWriter(tmp_path)
+        emails = [make_email(subject="Email 1"), make_email(subject="Email 2")]
+        response = make_response()
+
+        filepath = writer.write_batch(emails, response)
+
+        with filepath.open() as f:
+            data = json.loads(f.readline())
+
+        assert "recipients" in data["emails"][0]
+        assert data["emails"][0]["recipients"] == ["me@example.com"]

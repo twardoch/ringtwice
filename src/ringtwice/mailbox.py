@@ -8,13 +8,16 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, ClassVar, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Final, cast
 
 from imap_tools.mailbox import MailBox as IMAPToolsMailBox
 from imap_tools.query import AND
 
 if TYPE_CHECKING:
     from ringtwice.config import MailboxConfig
+
+
+DEFAULT_FOLDERS: Final[tuple[str, ...]] = ("INBOX",)
 
 
 @dataclass

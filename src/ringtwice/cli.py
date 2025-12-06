@@ -24,7 +24,7 @@ from rich.table import Table
 from rich.text import Text
 
 from ringtwice.config import Config, get_default_config_path
-from ringtwice.mailbox import Email, SearchCriteria, create_backend
+from ringtwice.mailbox import DEFAULT_FOLDERS, Email, SearchCriteria, create_backend
 from ringtwice.pipeline import PipelineStats
 from ringtwice.runner import (
     AskParams,
@@ -387,7 +387,7 @@ def _show_config(config_file: Path | None = None) -> None:
             backend = None
             try:
                 backend = create_backend(mailbox_config)
-                iterator = backend.search(SearchCriteria(), ["INBOX"])
+                iterator = backend.search(SearchCriteria(), list(DEFAULT_FOLDERS))
                 try:
                     next(iterator)
                     detail = "connected (fetched first email)"
@@ -414,6 +414,8 @@ class RingtwiceCLI:
         self,
         parse_query: str,
         search_query: str | None = None,
+        folders: str | None = None,
+        in_sent: bool = False,
         thread: bool = False,
         max_emails: int | None = None,
         boxes: list[str] | None = None,
@@ -437,6 +439,8 @@ class RingtwiceCLI:
         Args:
             parse_query: LLM prompt to apply to emails (required)
             search_query: Email search text
+            folders: Comma-separated folders/labels to search (defaults to INBOX)
+            in_sent: Shortcut to search Sent mail (same as --folders sent)
             thread: Retrieve full threads vs individual emails
             max_emails: Limit number of emails to process
             boxes: Mailbox names to search (from config)
@@ -451,9 +455,14 @@ class RingtwiceCLI:
             subject: Filter by subject substring
             legacy: Use legacy synchronous mode (fetch all, then process)
         """
+        folder_list = split_csv(folders)
+        if in_sent and not folder_list:
+            folder_list = ["sent"]
+
         params = AskParams(
             parse_query=parse_query,
             search_query=search_query,
+            folders=folder_list,
             thread=thread,
             max_emails=max_emails,
             boxes=boxes,
@@ -490,6 +499,8 @@ class RingtwiceCLI:
 def ask(
     parse_query: str,
     search_query: str | None = None,
+    folders: str | None = None,
+    in_sent: bool = False,
     thread: bool = False,
     max_emails: int | None = None,
     boxes: list[str] | None = None,
@@ -509,6 +520,8 @@ def ask(
     cli.ask(
         parse_query=parse_query,
         search_query=search_query,
+        folders=folders,
+        in_sent=in_sent,
         thread=thread,
         max_emails=max_emails,
         boxes=boxes,

@@ -8,7 +8,7 @@ import pytest
 
 from ringtwice.config import Config, LLMConfig, MailboxConfig
 from ringtwice.llm import LLMResponse
-from ringtwice.mailbox import Email
+from ringtwice.mailbox import DEFAULT_FOLDERS, Email
 from ringtwice.runner import (
     AskParams,
     RunCallbacks,
@@ -17,6 +17,7 @@ from ringtwice.runner import (
     parse_date,
     process_emails_batch,
     process_emails_individual,
+    resolve_folders,
     resolve_mailboxes,
     run_ask,
     split_csv,
@@ -130,6 +131,19 @@ class TestBuildSearchCriteria:
         assert criteria.subject == "Important"
 
 
+class TestResolveFolders:
+    """Tests for resolve_folders helper."""
+
+    def test_defaults_to_inbox(self) -> None:
+        """Fallback to INBOX when not provided."""
+        assert resolve_folders(None) == list(DEFAULT_FOLDERS)
+        assert resolve_folders([]) == list(DEFAULT_FOLDERS)
+
+    def test_returns_custom(self) -> None:
+        """Return caller-provided folders."""
+        assert resolve_folders(["Sent"]) == ["Sent"]
+
+
 class TestFetchEmails:
     """Tests for fetch_emails function."""
 
@@ -156,6 +170,7 @@ class TestFetchEmails:
             result = fetch_emails(
                 [("test", mailbox_config)],
                 SearchCriteria(),
+                folders=None,
                 thread=False,
                 max_emails=None,
             )
@@ -163,6 +178,8 @@ class TestFetchEmails:
             assert len(result.emails) == 1
             assert result.counts_by_mailbox["test"] == 1
             backend_instance.close.assert_called_once()
+            search_args, _ = backend_instance.search.call_args
+            assert search_args[1] == list(DEFAULT_FOLDERS)
 
     def test_fetch_with_max_emails(self) -> None:
         """Test fetch respects max_emails."""
@@ -190,11 +207,43 @@ class TestFetchEmails:
             result = fetch_emails(
                 [("test", mailbox_config)],
                 SearchCriteria(),
+                folders=None,
                 thread=False,
                 max_emails=3,
             )
 
             assert len(result.emails) == 3
+
+    def test_fetch_respects_custom_folders(self) -> None:
+        """Use caller-provided folders instead of defaults."""
+        mailbox_config = MailboxConfig(type="imap", host="a", username="u", password="p")
+        email = Email(
+            uid="1",
+            subject="Test",
+            sender="sender@example.com",
+            recipients=["me@example.com"],
+            date=datetime(2024, 1, 15),
+            text="Hello",
+            html=None,
+        )
+
+        with patch("ringtwice.runner.create_backend") as mock_backend:
+            backend_instance = MagicMock()
+            backend_instance.search.return_value = iter([email])
+            mock_backend.return_value = backend_instance
+
+            from ringtwice.mailbox import SearchCriteria
+
+            fetch_emails(
+                [("test", mailbox_config)],
+                SearchCriteria(),
+                folders=["SENT"],
+                thread=False,
+                max_emails=None,
+            )
+
+            search_args, _ = backend_instance.search.call_args
+            assert search_args[1] == ["SENT"]
 
 
 class TestProcessEmails:

@@ -13,6 +13,8 @@ The `PROMPT` is the instruction sent to the LLM along with each email's content.
 | Flag | Description |
 |------|-------------|
 | `--search-query` | Email search text (Gmail syntax or IMAP TEXT search) |
+| `--folders` | Comma-separated folders/labels to search (defaults to INBOX) |
+| `--in-sent` | Shortcut for `--folders sent` |
 | `--date-from` | Filter emails after this date (YYYY-MM-DD) |
 | `--date-to` | Filter emails before this date (YYYY-MM-DD) |
 | `--sender` | Filter by sender address/name (comma-separated allowed) |
@@ -68,6 +70,16 @@ ringtwice ask "Is this email spam? Answer YES or NO." \
     --boxes work \
     --search-query "is:inbox"
 ```
+
+### Search sent mail
+
+```bash
+ringtwice ask "Summarize what I sent recently." \
+    --in-sent \
+    --date-from 2024-12-01
+```
+
+Use Gmail labels (e.g., `sent`, `inbox`, custom labels) or IMAP folder names (`Sent`, `[Gmail]/Sent Mail`, etc.). When omitted, `INBOX` is searched by default.
 
 ## Inspect configuration
 

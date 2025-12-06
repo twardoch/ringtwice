@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 
 from ringtwice.config import Config, get_default_config_path
 from ringtwice.llm import LLMClient
-from ringtwice.mailbox import Email, SearchCriteria, create_backend
+from ringtwice.mailbox import DEFAULT_FOLDERS, Email, SearchCriteria, create_backend
 from ringtwice.output import OutputWriter, get_default_output_dir
 from ringtwice.pipeline import PipelineCallbacks, PipelineStats, run_pipeline
 from ringtwice.processor import EmailProcessor
@@ -30,6 +30,7 @@ class AskParams:
 
     parse_query: str
     search_query: str | None = None
+    folders: list[str] | None = None
     thread: bool = False
     max_emails: int | None = None
     boxes: list[str] | None = None
@@ -78,6 +79,11 @@ def resolve_mailboxes(
     return [(name, config.mailbox[name]) for name in names]
 
 
+def resolve_folders(requested: list[str] | None) -> list[str]:
+    """Resolve folders to search, defaulting to INBOX."""
+    return requested or list(DEFAULT_FOLDERS)
+
+
 def build_search_criteria(params: AskParams) -> SearchCriteria:
     """Build search criteria from params."""
     return SearchCriteria(
@@ -93,6 +99,7 @@ def build_search_criteria(params: AskParams) -> SearchCriteria:
 def fetch_emails(
     mailbox_configs: list[tuple[str, MailboxConfig]],
     criteria: SearchCriteria,
+    folders: list[str] | None = None,
     thread: bool,
     max_emails: int | None,
     on_progress: Callable[[], None] | None = None,
@@ -101,11 +108,12 @@ def fetch_emails(
     all_emails: list[Email] = []
     counts: dict[str, int] = defaultdict(int)
 
+    resolved_folders = resolve_folders(folders)
+
     for mailbox_name, mailbox_config in mailbox_configs:
         backend = create_backend(mailbox_config)
         try:
-            folders = ["INBOX"]
-            for email in backend.search(criteria, folders):
+            for email in backend.search(criteria, resolved_folders):
                 if thread:
                     thread_emails = backend.get_thread(email)
                     all_emails.extend(thread_emails)
@@ -144,7 +152,7 @@ def process_emails_individual(
         content = processor.process_thread([email]) if thread else processor.process(email)
         for response in llm.process_batch(parse_query, [content]):
             path = writer.write(email, response)
-            if on_write:
+            if path and on_write:
                 on_write(path)
         if on_progress:
             on_progress()
@@ -170,7 +178,7 @@ def process_emails_batch(
         combined = "\n---\n".join(batch_contents)
         for response in llm.process_batch(parse_query, [combined]):
             path = writer.write_batch(batch_emails, response)
-            if on_write:
+            if path and on_write:
                 on_write(path)
 
     for email in emails:
@@ -207,12 +215,14 @@ def run_ask(params: AskParams, callbacks: RunCallbacks | None = None) -> Path:
 
     criteria = build_search_criteria(params)
     mailbox_configs = resolve_mailboxes(config, params.boxes)
+    folders = resolve_folders(params.folders)
 
     # Fetch emails
     cb.on_fetch_start()
     result = fetch_emails(
         mailbox_configs,
         criteria,
+        folders,
         params.thread,
         params.max_emails,
         on_progress=cb.on_fetch_progress,
@@ -311,6 +321,7 @@ async def run_ask_async(
 
     criteria = build_search_criteria(params)
     mailbox_configs = resolve_mailboxes(config, params.boxes)
+    folders = resolve_folders(params.folders)
 
     # Convert callbacks to pipeline format
     pipeline_callbacks = PipelineCallbacks(
@@ -334,6 +345,7 @@ async def run_ask_async(
         writer=writer,
         processor=processor,
         parse_query=params.parse_query,
+        folders=folders,
         thread=params.thread,
         max_emails=params.max_emails,
         batch=params.batch,

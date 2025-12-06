@@ -28,7 +28,7 @@ from tenacity import (
 )
 
 from ringtwice.llm import LLMClient, LLMResponse
-from ringtwice.mailbox import Email, MailboxBackend, SearchCriteria, create_backend
+from ringtwice.mailbox import DEFAULT_FOLDERS, Email, MailboxBackend, SearchCriteria, create_backend
 from ringtwice.output import OutputWriter
 from ringtwice.processor import EmailProcessor
 
@@ -226,6 +226,7 @@ class EmailFetcher:
         self,
         mailbox_configs: list[tuple[str, MailboxConfig]],
         criteria: SearchCriteria,
+        folders: list[str] | None = None,
         buffer: EmailBuffer,
         processor: EmailProcessor,
         thread: bool = False,
@@ -236,6 +237,7 @@ class EmailFetcher:
     ) -> None:
         self._mailbox_configs = mailbox_configs
         self._criteria = criteria
+        self._folders = folders or list(DEFAULT_FOLDERS)
         self._buffer = buffer
         self._processor = processor
         self._thread = thread
@@ -287,9 +289,8 @@ class EmailFetcher:
                 backend: MailboxBackend | None = None
                 try:
                     backend = create_backend(mailbox_config)
-                    folders = ["INBOX"]
 
-                    for email in backend.search(self._criteria, folders):
+                    for email in backend.search(self._criteria, self._folders):
                         if self._stop_event.is_set():
                             break
 
@@ -423,7 +424,7 @@ class LLMWorker:
                     response.usage_prompt_tokens + response.usage_completion_tokens
                 )
 
-                # Write output
+                # Write output (may return None if response was empty/irrelevant)
                 loop = asyncio.get_event_loop()
                 if item.type == WorkItemType.BATCH:
                     path = await loop.run_in_executor(
@@ -434,8 +435,9 @@ class LLMWorker:
                         None, self._writer.write, item.emails[0], response
                     )
 
-                self._stats.files_written += 1
-                self._callbacks.on_write(path, len(item.emails))
+                if path:
+                    self._stats.files_written += 1
+                    self._callbacks.on_write(path, len(item.emails))
 
             self._stats.emails_processed += len(item.emails)
             return True
@@ -492,6 +494,7 @@ class Pipeline:
         self,
         mailbox_configs: list[tuple[str, MailboxConfig]],
         criteria: SearchCriteria,
+        folders: list[str] | None,
         llm: LLMClient,
         writer: OutputWriter,
         processor: EmailProcessor,
@@ -506,6 +509,7 @@ class Pipeline:
     ) -> None:
         self._mailbox_configs = mailbox_configs
         self._criteria = criteria
+        self._folders = folders or list(DEFAULT_FOLDERS)
         self._llm = llm
         self._writer = writer
         self._processor = processor
@@ -546,6 +550,7 @@ class Pipeline:
         self._fetcher = EmailFetcher(
             mailbox_configs=self._mailbox_configs,
             criteria=self._criteria,
+            folders=self._folders,
             buffer=self._buffer,
             processor=self._processor,
             thread=self._thread,
@@ -630,6 +635,7 @@ class Pipeline:
 async def run_pipeline(
     mailbox_configs: list[tuple[str, MailboxConfig]],
     criteria: SearchCriteria,
+    folders: list[str] | None = None,
     llm: LLMClient,
     writer: OutputWriter,
     processor: EmailProcessor,
@@ -665,6 +671,7 @@ async def run_pipeline(
     pipeline = Pipeline(
         mailbox_configs=mailbox_configs,
         criteria=criteria,
+        folders=folders,
         llm=llm,
         writer=writer,
         processor=processor,
