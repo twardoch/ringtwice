@@ -55,6 +55,9 @@ class OutputWriter:
         with filepath.open("a") as f:
             f.write(json.dumps(record) + "\n")
 
+        # Print formatted response
+        print(f"\n---\n\n### {email.subject}\n\n{response.content}\n")
+
         return filepath
 
     def write_batch(self, emails: list[Email], response: LLMResponse) -> Path:
@@ -79,5 +82,11 @@ class OutputWriter:
 
         with filepath.open("a") as f:
             f.write(json.dumps(record) + "\n")
+
+        # Print formatted response
+        subjects = ", ".join(e.subject for e in emails[:3])
+        if len(emails) > 3:
+            subjects += f" (+{len(emails) - 3} more)"
+        print(f"\n---\n\n### Batch: {subjects}\n\n{response.content}\n")
 
         return filepath
