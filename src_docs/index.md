@@ -1,10 +1,12 @@
 # ringtwice
 
+> The postman always rings twice
+
 A CLI tool that processes emails with LLMs. Fetch emails from Gmail or IMAP, clean them up, send them to any OpenAI-compatible LLM, and save the results.
 
 ## What is ringtwice?
 
-ringtwice is a command-line tool that connects your email inbox to large language models. It fetches emails matching your criteria, cleans them up (removing HTML, signatures, quoted replies), sends the content to an LLM with your prompt, and saves structured results.
+`ringtwice` is a command-line tool that connects your email inbox to large language models. It fetches emails matching your criteria, cleans them up (removing HTML, signatures, quoted replies), sends the content to an LLM with your prompt, and saves structured results.
 
 ## What does it do?
 

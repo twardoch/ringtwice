@@ -1,5 +1,7 @@
 # ringtwice
 
+> The postman always rings twice
+
 A CLI tool that processes emails with LLMs. Fetch emails from Gmail or IMAP, clean them up, send them to any OpenAI-compatible LLM, and save the results.
 
 ## Quick Start
