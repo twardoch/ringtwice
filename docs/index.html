@@ -328,39 +328,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-is-ringtwice" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What is ringtwice?
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-does-it-do" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What does it do?
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-does-it-work" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How does it work?
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#quick-start" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -372,10 +339,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#documentation" class="md-nav__link">
+  <a href="#what-it-does" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Documentation
+        What it does
       
     </span>
   </a>
@@ -383,10 +350,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#why-this-design" class="md-nav__link">
+  <a href="#documentation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Why this design?
+        Documentation
       
     </span>
   </a>
@@ -602,39 +569,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-is-ringtwice" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What is ringtwice?
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-does-it-do" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What does it do?
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-does-it-work" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How does it work?
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#quick-start" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -646,10 +580,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#documentation" class="md-nav__link">
+  <a href="#what-it-does" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Documentation
+        What it does
       
     </span>
   </a>
@@ -657,10 +591,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#why-this-design" class="md-nav__link">
+  <a href="#documentation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Why this design?
+        Documentation
       
     </span>
   </a>
@@ -701,77 +635,59 @@
 <p>The postman always rings twice</p>
 </blockquote>
 <p>A CLI tool that processes emails with LLMs. Fetch emails from Gmail or IMAP, clean them up, send them to any OpenAI-compatible LLM, and save the results.</p>
-<h2 id="what-is-ringtwice">What is ringtwice?<a class="headerlink" href="#what-is-ringtwice" title="Permanent link">&para;</a></h2>
-<p><code>ringtwice</code> is a command-line tool that connects your email inbox to large language models. It fetches emails matching your criteria, cleans them up (removing HTML, signatures, quoted replies), sends the content to an LLM with your prompt, and saves structured results.</p>
-<h2 id="what-does-it-do">What does it do?<a class="headerlink" href="#what-does-it-do" title="Permanent link">&para;</a></h2>
+<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Install</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--system<span class="w"> </span>-e<span class="w"> </span>.
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Or with virtual environment</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>uv<span class="w"> </span>venv<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>uv<span class="w"> </span>sync
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>uv<span class="w"> </span>run<span class="w"> </span>ringtwice<span class="w"> </span>--help
+</span></code></pre></div>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Run</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>ringtwice<span class="w"> </span>ask<span class="w"> </span><span class="s2">&quot;Extract all action items and deadlines&quot;</span><span class="w"> </span>--max-emails<span class="w"> </span><span class="m">5</span>
+</span></code></pre></div>
+<h2 id="what-it-does">What it does<a class="headerlink" href="#what-it-does" title="Permanent link">&para;</a></h2>
 <ol>
 <li><strong>Fetches emails</strong> from Gmail (via API) or any IMAP server</li>
-<li><strong>Filters</strong> by search query, date range, sender, recipient, or subject</li>
-<li><strong>Cleans</strong> email content: converts HTML to text, removes signatures, strips quoted replies</li>
-<li><strong>Sends</strong> to any OpenAI-compatible LLM endpoint (OpenAI, Anthropic, Cerebras, Together, Groq, Ollama, etc.)</li>
-<li><strong>Saves</strong> results as JSONL files with email metadata and LLM responses</li>
+<li><strong>Cleans</strong> email content: converts HTML to text, removes signatures and quoted replies</li>
+<li><strong>Sends</strong> to any OpenAI-compatible LLM with your prompt</li>
+<li><strong>Saves</strong> results as JSONL files</li>
 </ol>
-<h2 id="how-does-it-work">How does it work?<a class="headerlink" href="#how-does-it-work" title="Permanent link">&para;</a></h2>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│   Gmail/    │────▶│   Email     │────▶│    LLM      │────▶│   JSONL     │
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│   IMAP      │     │  Processor  │     │   Client    │     │   Output    │
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>      │                    │                   │                   │
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>   Search &amp;          Strip HTML,         OpenAI-compat      One file per
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>   filter            signatures,          API call          email/batch
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>                     quotes
-</span></code></pre></div>
-<p><strong>Email backends:</strong></p>
-<ul>
-<li><strong>Gmail</strong>: Uses the official Gmail API with OAuth2. Supports native threading and Gmail's powerful search syntax.</li>
-<li><strong>IMAP</strong>: Uses <code>imap-tools</code> for any standard IMAP server. Works with Outlook, Yahoo, Fastmail, self-hosted, etc.</li>
-</ul>
-<p><strong>Email processing:</strong></p>
-<ul>
-<li><code>html2text</code> converts HTML emails to clean markdown-style text</li>
-<li><code>mail-parser-reply</code> removes quoted replies ("On Mon, Jan 1, ... wrote:") and signatures</li>
-</ul>
-<p><strong>LLM integration:</strong></p>
-<ul>
-<li>Uses the <code>openai</code> Python library with configurable <code>base_url</code></li>
-<li>Works with any OpenAI-compatible endpoint</li>
-<li>Automatic retry with exponential backoff (via <code>tenacity</code>)</li>
-<li>Token-aware text splitting for long emails (via <code>semantic-text-splitter</code>)</li>
-</ul>
-<p><strong>Output:</strong></p>
-<ul>
-<li>JSONL format: one JSON object per line</li>
-<li>Filenames: <code>YYMMDD-HHMMSS-sender-subject.jsonl</code></li>
-<li>Each record contains email metadata, LLM response, and timestamps</li>
-</ul>
-<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Install</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--system<span class="w"> </span>-e<span class="w"> </span>.
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># Or with virtual environment</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>uv<span class="w"> </span>venv<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>uv<span class="w"> </span>sync
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1"># Run</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>ringtwice<span class="w"> </span>ask<span class="w"> </span><span class="s2">&quot;Extract all action items and deadlines&quot;</span><span class="w"> </span>--max-emails<span class="w"> </span><span class="m">5</span>
-</span></code></pre></div>
-<p>Results are saved to <code>./output/YYMMDD-HHMMSS/</code> as JSONL files.</p>
 <h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
-<ul>
-<li><a href="installation/">Installation</a> - Setup and requirements</li>
-<li><a href="gmail/">Gmail Setup</a> - Step-by-step Gmail API configuration</li>
-<li><a href="cli/">CLI Usage</a> - Command-line options and examples</li>
-<li><a href="configuration/">Configuration</a> - Config file format and options</li>
-<li><a href="python-api/">Python API</a> - Using ringtwice as a library</li>
-<li><a href="development/">Development</a> - Contributing and extending</li>
-</ul>
-<h2 id="why-this-design">Why this design?<a class="headerlink" href="#why-this-design" title="Permanent link">&para;</a></h2>
-<p><strong>Why Gmail API instead of IMAP for Gmail?</strong>
-Gmail's IMAP implementation is quirky and slow. The native API provides proper threading, faster search, and OAuth2 (no app passwords needed).</p>
-<p><strong>Why OpenAI-compatible endpoints?</strong>
-Most LLM providers now support the OpenAI API format. One client works everywhere: OpenAI, Anthropic (via proxy), Cerebras, Together, Groq, Fireworks, Ollama, vLLM, etc.</p>
-<p><strong>Why JSONL output?</strong>
-JSONL is append-friendly (no array closing brackets), streamable, and easy to process with <code>jq</code>, Python, or any JSON parser. One file per email means you can incrementally process results.</p>
-<p><strong>Why clean emails before sending to LLM?</strong>
-Email threads accumulate cruft: HTML formatting, signatures repeated 10 times, entire conversation histories quoted. Cleaning reduces token usage by 50-80% and improves LLM response quality.</p>
+<table>
+<thead>
+<tr>
+<th>Document</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="src_docs/installation/">Installation</a></td>
+<td>Setup, requirements, and quick start</td>
+</tr>
+<tr>
+<td><a href="src_docs/gmail/">Gmail Setup</a></td>
+<td>Step-by-step Gmail API configuration</td>
+</tr>
+<tr>
+<td><a href="src_docs/cli/">CLI Usage</a></td>
+<td>Command-line options and examples</td>
+</tr>
+<tr>
+<td><a href="src_docs/configuration/">Configuration</a></td>
+<td>Config file format and options</td>
+</tr>
+<tr>
+<td><a href="src_docs/python-api/">Python API</a></td>
+<td>Using ringtwice as a library</td>
+</tr>
+<tr>
+<td><a href="src_docs/development/">Development</a></td>
+<td>Contributing and extending</td>
+</tr>
+</tbody>
+</table>
 <h2 id="license">License<a class="headerlink" href="#license" title="Permanent link">&para;</a></h2>
 <p>MIT</p>
 

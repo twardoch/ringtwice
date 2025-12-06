@@ -89,6 +89,7 @@ class TestAsk:
                 parse_query="Extract info",
                 output_dir=str(output_dir),
                 config_file=str(tmp_path / "config.toml"),
+                legacy=True,
             )
 
         assert output_dir.exists()
@@ -121,6 +122,7 @@ class TestAsk:
                 output_dir=str(output_dir),
                 config_file=str(tmp_path / "config.toml"),
                 batch=False,
+                legacy=True,
             )
 
             assert llm_instance.process_batch.called
@@ -165,6 +167,7 @@ class TestAsk:
                 output_dir=str(output_dir),
                 config_file=str(tmp_path / "config.toml"),
                 batch=True,
+                legacy=True,
             )
 
             assert llm_instance.process_batch.called
@@ -209,6 +212,7 @@ class TestAsk:
                 output_dir=str(output_dir),
                 config_file=str(tmp_path / "config.toml"),
                 max_emails=3,
+                legacy=True,
             )
 
             assert llm_instance.process_batch.call_count == 3
@@ -235,6 +239,7 @@ class TestAsk:
                 parse_query="Extract info",
                 output_dir=str(output_dir),
                 config_file=str(tmp_path / "config.toml"),
+                legacy=True,
             )
 
         captured = capsys.readouterr()
@@ -270,6 +275,7 @@ class TestAsk:
                 search_query="meeting",
                 sender="boss@example.com",
                 date_from="2024-01-01",
+                legacy=True,
             )
 
             backend_instance.search.assert_called_once()

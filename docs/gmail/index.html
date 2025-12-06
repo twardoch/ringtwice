@@ -1046,7 +1046,10 @@
 <p>This guide walks you through setting up Gmail access for ringtwice. It takes about 10 minutes.</p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>ringtwice uses the Gmail API with OAuth 2.0. You'll create a "project" in Google Cloud Console, enable the Gmail API, and download a credentials file. On first run, ringtwice opens your browser to authorize access.</p>
-<p><strong>Important</strong>: Your credentials never leave your computer. ringtwice only requests read-only access to your email.</p>
+<div class="admonition info">
+<p class="admonition-title">Privacy &amp; Security</p>
+<p>Your credentials never leave your computer. <code>ringtwice</code> only requests read-only access to your email.</p>
+</div>
 <hr />
 <h2 id="step-1-create-a-google-cloud-project">Step 1: Create a Google Cloud Project<a class="headerlink" href="#step-1-create-a-google-cloud-project" title="Permanent link">&para;</a></h2>
 <ol>
@@ -1142,11 +1145,13 @@
 <p>In the filter/search box, type: <code>gmail.readonly</code></p>
 </li>
 <li>
-<p>Check the box next to:
-   <div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>https://www.googleapis.com/auth/gmail.readonly
+<p>Check the box next to:</p>
+</li>
+</ol>
+<p><div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>https://www.googleapis.com/auth/gmail.readonly
 </span></code></pre></div>
    (Description: "View your email messages and settings")</p>
-</li>
+<ol>
 <li>
 <p>Click <strong>Update</strong></p>
 </li>
@@ -1203,12 +1208,14 @@
 <h2 id="step-6-install-the-credentials-file">Step 6: Install the Credentials File<a class="headerlink" href="#step-6-install-the-credentials-file" title="Permanent link">&para;</a></h2>
 <p>Move the downloaded JSON file to your ringtwice config directory.</p>
 <h3 id="find-your-config-directory">Find your config directory<a class="headerlink" href="#find-your-config-directory" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from platformdirs import user_config_dir; print(user_config_dir(&#39;ringtwice&#39;))&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from platformdirs import user_config_dir; print(user_config_dir(&#39;ringtwice&#39;))&quot;</span>
 </span></code></pre></div>
-<p>This returns:
-- <strong>macOS</strong>: <code>~/Library/Application Support/ringtwice</code>
-- <strong>Linux</strong>: <code>~/.config/ringtwice</code>
-- <strong>Windows</strong>: <code>%APPDATA%\ringtwice</code></p>
+<p>This returns:</p>
+<ul>
+<li><strong>macOS</strong>: <code>~/Library/Application Support/ringtwice</code></li>
+<li><strong>Linux</strong>: <code>~/.config/ringtwice</code></li>
+<li><strong>Windows</strong>: <code>%APPDATA%\ringtwice</code></li>
+</ul>
 <h3 id="move-and-rename-the-file">Move and rename the file<a class="headerlink" href="#move-and-rename-the-file" title="Permanent link">&para;</a></h3>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># macOS</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>mv<span class="w"> </span>~/Downloads/client_secret_*.json<span class="w"> </span>~/Library/Application<span class="se">\ </span>Support/ringtwice/gmail_credentials.json
@@ -1234,7 +1241,7 @@
 </span></code></pre></div>
 <hr />
 <h2 id="step-8-first-run">Step 8: First Run<a class="headerlink" href="#step-8-first-run" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>ringtwice<span class="w"> </span>ask<span class="w"> </span><span class="s2">&quot;Summarize this email&quot;</span><span class="w"> </span>--max-emails<span class="w"> </span><span class="m">1</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>uv<span class="w"> </span>run<span class="w"> </span>ringtwice<span class="w"> </span>ask<span class="w"> </span><span class="s2">&quot;Summarize this email&quot;</span><span class="w"> </span>--max-emails<span class="w"> </span><span class="m">1</span>
 </span></code></pre></div>
 <p><strong>What happens:</strong></p>
 <ol>
@@ -1261,6 +1268,9 @@
 <ol>
 <li>
 <p><strong>Live with it</strong>: Just re-authorize weekly when prompted. ringtwice will open your browser automatically.</p>
+<blockquote>
+<p><strong>Note:</strong> Just run the command again if it fails with an auth error.</p>
+</blockquote>
 </li>
 <li>
 <p><strong>Publish the app</strong>: Go to OAuth consent screen → <strong>Publishing status</strong> → <strong>Publish App</strong>.</p>

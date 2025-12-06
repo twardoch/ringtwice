@@ -21,6 +21,7 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 from rich.table import Table
+from rich.text import Text
 
 from ringtwice.config import Config, get_default_config_path
 from ringtwice.mailbox import Email, SearchCriteria, create_backend
@@ -208,8 +209,8 @@ def _make_async_callbacks() -> tuple[AsyncRunCallbacks, AsyncProgressState]:
         content = Group(
             fetch_progress,
             process_progress,
-            TextColumn(fetch_status),
-            TextColumn(process_status + error_lines),
+            Text.from_markup(fetch_status),
+            Text.from_markup(process_status + error_lines),
         )
 
         return Panel(content, title="[bold]Ringtwice Pipeline", border_style="blue")
@@ -501,6 +502,7 @@ def ask(
     sender: str | None = None,
     recipient: str | None = None,
     subject: str | None = None,
+    legacy: bool = False,
 ) -> None:
     """Standalone function for backwards compatibility and direct imports."""
     cli = RingtwiceCLI()
@@ -519,6 +521,7 @@ def ask(
         sender=sender,
         recipient=recipient,
         subject=subject,
+        legacy=legacy,
     )
 
 

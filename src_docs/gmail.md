@@ -6,7 +6,8 @@ This guide walks you through setting up Gmail access for ringtwice. It takes abo
 
 ringtwice uses the Gmail API with OAuth 2.0. You'll create a "project" in Google Cloud Console, enable the Gmail API, and download a credentials file. On first run, ringtwice opens your browser to authorize access.
 
-**Important**: Your credentials never leave your computer. ringtwice only requests read-only access to your email.
+!!! info "Privacy & Security"
+    Your credentials never leave your computer. `ringtwice` only requests read-only access to your email.
 
 ---
 
@@ -82,7 +83,8 @@ You should now see the **OAuth Overview** page with "OAuth configuration created
 3. In the filter/search box, type: `gmail.readonly`
 
 4. Check the box next to:
-   ```
+
+   ```text
    https://www.googleapis.com/auth/gmail.readonly
    ```
    (Description: "View your email messages and settings")
@@ -134,10 +136,11 @@ Move the downloaded JSON file to your ringtwice config directory.
 ### Find your config directory
 
 ```bash
-python -c "from platformdirs import user_config_dir; print(user_config_dir('ringtwice'))"
+uv run python -c "from platformdirs import user_config_dir; print(user_config_dir('ringtwice'))"
 ```
 
 This returns:
+
 - **macOS**: `~/Library/Application Support/ringtwice`
 - **Linux**: `~/.config/ringtwice`
 - **Windows**: `%APPDATA%\ringtwice`
@@ -178,7 +181,7 @@ credentials_file = "gmail_credentials.json"  # Just the filename - same director
 ## Step 8: First Run
 
 ```bash
-ringtwice ask "Summarize this email" --max-emails 1
+uv run ringtwice ask "Summarize this email" --max-emails 1
 ```
 
 **What happens:**
@@ -216,6 +219,7 @@ A token file (`gmail_token.json`) is saved in your config directory. Future runs
 **Two options:**
 
 1. **Live with it**: Just re-authorize weekly when prompted. ringtwice will open your browser automatically.
+   > **Note:** Just run the command again if it fails with an auth error.
 
 2. **Publish the app**: Go to OAuth consent screen → **Publishing status** → **Publish App**.
    - For personal use with just the `gmail.readonly` scope, Google typically doesn't require verification.
