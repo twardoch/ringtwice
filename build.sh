@@ -92,7 +92,11 @@ run_build() {
 run_docs() {
     info "Building documentation..."
     uv sync --extra docs
-    uv run zensical build
+    # Copy markdown files to src_docs (zensical doesn't follow symlinks)
+    mkdir -p src_docs
+    cp README.md src_docs/index.md
+    cp GMAIL.md src_docs/gmail.md
+    uv run zensical build --clean
     success "Documentation built in docs/"
 }
 
@@ -100,6 +104,10 @@ run_docs() {
 serve_docs() {
     info "Serving documentation..."
     uv sync --extra docs
+    # Copy markdown files to src_docs (zensical doesn't follow symlinks)
+    mkdir -p src_docs
+    cp README.md src_docs/index.md
+    cp GMAIL.md src_docs/gmail.md
     uv run zensical serve
 }
 

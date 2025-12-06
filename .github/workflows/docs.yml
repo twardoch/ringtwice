@@ -54,8 +54,14 @@ jobs:
       - name: Install dependencies
         run: uv sync --extra docs
 
+      - name: Prepare documentation sources
+        run: |
+          mkdir -p src_docs
+          cp README.md src_docs/index.md
+          cp GMAIL.md src_docs/gmail.md
+
       - name: Build documentation
-        run: uv run zensical build
+        run: uv run zensical build --clean
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -33,7 +33,10 @@ class EmailProcessor:
             parsed = EmailReplyParser(languages=self._languages).read(text=text)
             # Get the latest reply body (without quotes/signatures)
             if parsed.replies:
-                return parsed.replies[0].body.strip()
+                body = parsed.replies[0].body
+                if isinstance(body, str):
+                    return body.strip()
+                return str(body).strip()
         except Exception:
             # Fall back to original text if parsing fails
             pass

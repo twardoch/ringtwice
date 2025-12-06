@@ -5,10 +5,11 @@ from __future__ import annotations
 import contextlib
 import json
 from pathlib import Path
+from dataclasses import dataclass
 
 import fire
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
+from rich.progress import Progress, SpinnerColumn, TaskID, TextColumn, TimeElapsedColumn
 from rich.table import Table
 
 from ringtwice.config import Config, get_default_config_path
@@ -18,9 +19,19 @@ from ringtwice.runner import AskParams, RunCallbacks, parse_date, run_ask, split
 console = Console(width=200, soft_wrap=True)
 
 
-def _make_callbacks() -> tuple[RunCallbacks, dict[str, object]]:
+@dataclass
+class ProgressState:
+    """Holds progress bars and task IDs for callbacks."""
+
+    fetch_progress: Progress | None = None
+    fetch_task: TaskID | None = None
+    process_progress: Progress | None = None
+    process_task: TaskID | None = None
+
+
+def _make_callbacks() -> tuple[RunCallbacks, ProgressState]:
     """Create callbacks with Rich progress bars."""
-    state: dict[str, object] = {}
+    progress_state = ProgressState()
 
     def on_fetch_start() -> None:
         progress = Progress(
@@ -31,19 +42,19 @@ def _make_callbacks() -> tuple[RunCallbacks, dict[str, object]]:
         )
         progress.start()
         task = progress.add_task("Fetching emails", start=True)
-        state["fetch_progress"] = progress
-        state["fetch_task"] = task
+        progress_state.fetch_progress = progress
+        progress_state.fetch_task = task
 
     def on_fetch_progress() -> None:
-        progress = state.get("fetch_progress")
-        task = state.get("fetch_task")
-        if progress and task is not None:
-            progress.advance(task)  # type: ignore[arg-type]
+        progress = progress_state.fetch_progress
+        task = progress_state.fetch_task
+        if progress is not None and task is not None:
+            progress.advance(task)
 
     def on_fetch_end(counts: dict[str, int], names: list[str]) -> None:
-        progress = state.get("fetch_progress")
+        progress = progress_state.fetch_progress
         if progress:
-            progress.stop()  # type: ignore[union-attr]
+            progress.stop()
 
         table = Table(title="Mailbox Summary", show_lines=False)
         table.add_column("Mailbox", style="cyan")
@@ -68,22 +79,22 @@ def _make_callbacks() -> tuple[RunCallbacks, dict[str, object]]:
         )
         progress.start()
         task = progress.add_task("Processing emails", total=total)
-        state["process_progress"] = progress
-        state["process_task"] = task
+        progress_state.process_progress = progress
+        progress_state.process_task = task
 
     def on_process_progress() -> None:
-        progress = state.get("process_progress")
-        task = state.get("process_task")
-        if progress and task is not None:
-            progress.advance(task)  # type: ignore[arg-type]
+        progress = progress_state.process_progress
+        task = progress_state.process_task
+        if progress is not None and task is not None:
+            progress.advance(task)
 
     def on_write(path: Path) -> None:
         console.print(f"[blue]Wrote[/]: {path}")
 
     def on_process_end(out_dir: Path) -> None:
-        progress = state.get("process_progress")
+        progress = progress_state.process_progress
         if progress:
-            progress.stop()  # type: ignore[union-attr]
+            progress.stop()
         console.print(f"[bold green]Output saved to:[/] {out_dir}")
 
     callbacks = RunCallbacks(
@@ -96,7 +107,7 @@ def _make_callbacks() -> tuple[RunCallbacks, dict[str, object]]:
         on_write=on_write,
         on_process_end=on_process_end,
     )
-    return callbacks, state
+    return callbacks, progress_state
 
 
 def _show_config(config_file: Path | None = None) -> None:

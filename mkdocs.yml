@@ -7,12 +7,12 @@ repo_url: https://github.com/twardoch/ringtwice
 repo_name: twardoch/ringtwice
 edit_uri: edit/main/
 
-docs_dir: .
+docs_dir: src_docs
 site_dir: docs
 
 nav:
-  - Home: README.md
-  - Gmail Setup: GMAIL.md
+  - Home: index.md
+  - Gmail Setup: gmail.md
 
 theme:
   name: material

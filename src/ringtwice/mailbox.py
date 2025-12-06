@@ -6,12 +6,12 @@ import base64
 from abc import ABC, abstractmethod
 from collections.abc import Iterator
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 
-from imap_tools import AND
-from imap_tools import MailBox as IMAPToolsMailBox
+from imap_tools.mailbox import MailBox as IMAPToolsMailBox  # type: ignore[import-untyped]
+from imap_tools.query import AND  # type: ignore[import-untyped]
 
 if TYPE_CHECKING:
     from ringtwice.config import MailboxConfig
@@ -70,7 +70,8 @@ class IMAPBackend(MailboxBackend):
     """IMAP email backend using imap-tools."""
 
     def __init__(self, host: str, username: str, password: str, port: int = 993) -> None:
-        self._mailbox = IMAPToolsMailBox(host, port).login(username, password)
+        # imap-tools does not ship typing metadata
+        self._mailbox: Any = IMAPToolsMailBox(host, port).login(username, password)  # type: ignore[no-untyped-call]
 
     def search(self, criteria: SearchCriteria, folders: list[str]) -> Iterator[Email]:
         """Search IMAP mailbox."""
@@ -78,6 +79,8 @@ class IMAPBackend(MailboxBackend):
             self._mailbox.folder.set(folder)
             imap_criteria = self._build_criteria(criteria)
             for msg in self._mailbox.fetch(imap_criteria):
+                if msg.uid is None:
+                    continue
                 yield Email(
                     uid=msg.uid,
                     subject=msg.subject,
@@ -90,7 +93,7 @@ class IMAPBackend(MailboxBackend):
 
     def _build_criteria(self, criteria: SearchCriteria) -> AND:
         """Convert SearchCriteria to imap-tools query."""
-        parts: dict[str, object] = {}
+        parts: dict[str, str | date] = {}
         text_parts: list[str] = []
         if criteria.query:
             text_parts.append(criteria.query)
@@ -127,6 +130,7 @@ class GmailBackend(MailboxBackend):
     """Gmail API backend."""
 
     SCOPES: ClassVar[list[str]] = ["https://www.googleapis.com/auth/gmail.readonly"]
+    _service: Any
 
     def __init__(self, credentials_file: Path) -> None:
         # Expand ~ and resolve path
@@ -139,23 +143,23 @@ class GmailBackend(MailboxBackend):
             )
         self._service = self._build_service()
 
-    def _build_service(self) -> object:
+    def _build_service(self) -> Any:
         """Build Gmail API service with OAuth."""
-        from google.oauth2.credentials import Credentials
-        from google_auth_oauthlib.flow import InstalledAppFlow
-        from googleapiclient.discovery import build
+        from google.oauth2.credentials import Credentials  # type: ignore[import-untyped]
+        from google_auth_oauthlib.flow import InstalledAppFlow  # type: ignore[import-untyped]
+        from googleapiclient.discovery import build  # type: ignore[import-untyped]
 
         # Store token next to credentials file
         token_path = self._credentials_file.parent / "gmail_token.json"
 
-        creds = None
+        creds: Any = None
         if token_path.exists():
             creds = Credentials.from_authorized_user_file(str(token_path), self.SCOPES)
 
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 # Try to refresh expired token
-                from google.auth.transport.requests import Request
+                from google.auth.transport.requests import Request  # type: ignore[import-untyped]
 
                 creds.refresh(Request())
             else:
@@ -172,7 +176,7 @@ class GmailBackend(MailboxBackend):
         """Search Gmail using API query syntax."""
         query = self._build_query(criteria, folders)
         results = (
-            self._service.users()  # type: ignore[union-attr]
+            self._service.users()
             .messages()
             .list(userId="me", q=query)
             .execute()
@@ -180,7 +184,7 @@ class GmailBackend(MailboxBackend):
 
         for msg_stub in results.get("messages", []):
             msg = (
-                self._service.users()  # type: ignore[union-attr]
+                self._service.users()
                 .messages()
                 .get(userId="me", id=msg_stub["id"], format="full")
                 .execute()
@@ -215,7 +219,7 @@ class GmailBackend(MailboxBackend):
             parts.append(f"({folder_query})")
         return " ".join(parts)
 
-    def _parse_message(self, msg: dict) -> Email:
+    def _parse_message(self, msg: dict[str, Any]) -> Email:
         """Parse Gmail API message to Email dataclass."""
         headers = {h["name"].lower(): h["value"] for h in msg["payload"]["headers"]}
 
@@ -265,7 +269,7 @@ class GmailBackend(MailboxBackend):
         if not email.thread_id:
             return [email]
         thread = (
-            self._service.users()  # type: ignore[union-attr]
+            self._service.users()
             .threads()
             .get(userId="me", id=email.thread_id)
             .execute()
