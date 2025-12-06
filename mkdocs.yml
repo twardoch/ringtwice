@@ -12,7 +12,12 @@ site_dir: docs
 
 nav:
   - Home: index.md
+  - Installation: installation.md
   - Gmail Setup: gmail.md
+  - CLI Usage: cli.md
+  - Configuration: configuration.md
+  - Python API: python-api.md
+  - Development: development.md
 
 theme:
   name: material
