@@ -100,8 +100,8 @@ def fetch_emails(
     mailbox_configs: list[tuple[str, MailboxConfig]],
     criteria: SearchCriteria,
     folders: list[str] | None = None,
-    thread: bool,
-    max_emails: int | None,
+    thread: bool = False,
+    max_emails: int | None = None,
     on_progress: Callable[[], None] | None = None,
 ) -> FetchResult:
     """Fetch emails from all mailboxes."""

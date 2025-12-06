@@ -11,7 +11,6 @@ from pathlib import Path
 import fire
 from rich.console import Console, Group
 from rich.live import Live
-from rich.panel import Panel
 from rich.progress import (
     BarColumn,
     Progress,
@@ -36,7 +35,8 @@ from ringtwice.runner import (
     split_csv,
 )
 
-console = Console(width=200, soft_wrap=True)
+# Keep console output narrow to avoid overly wide progress layouts.
+console = Console(width=80, soft_wrap=True)
 
 
 @dataclass
@@ -181,7 +181,7 @@ def _make_async_callbacks() -> tuple[AsyncRunCallbacks, AsyncProgressState]:
     state.fetch_progress = fetch_progress
     state.process_progress = process_progress
 
-    def create_layout() -> Panel:
+    def create_layout() -> Group:
         """Create the layout for concurrent display."""
         # Build status lines
         fetch_status = (
@@ -213,7 +213,7 @@ def _make_async_callbacks() -> tuple[AsyncRunCallbacks, AsyncProgressState]:
             Text.from_markup(process_status + error_lines),
         )
 
-        return Panel(content, title="[bold]Ringtwice Pipeline", border_style="blue")
+        return content
 
     def on_fetch_start() -> None:
         with state.lock:
