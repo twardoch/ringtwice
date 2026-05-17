@@ -1,4 +1,4 @@
-"""Core orchestration for email processing with LLMs."""
+"""Core orchestration for email processing with LLMs. Connects mailboxes, formats prompts, and runs inference."""
 
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class AskParams:
-    """Parameters for the ask command."""
+    """CLI parameters converted into pipeline inputs."""
 
     parse_query: str
     search_query: str | None = None
@@ -47,14 +47,14 @@ class AskParams:
 
 @dataclass
 class FetchResult:
-    """Result of fetching emails."""
+    """Raw emails fetched from a mailbox and their totals."""
 
     emails: list[Email]
     counts_by_mailbox: dict[str, int]
 
 
 def split_csv(value: str | None) -> list[str] | None:
-    """Split a comma-separated string into a list of trimmed entries."""
+    """Split comma-separated strings into trimmed lists. Drop empties."""
     if value is None:
         return None
     parts = [v.strip() for v in value.split(",")]
@@ -62,7 +62,7 @@ def split_csv(value: str | None) -> list[str] | None:
 
 
 def parse_date(value: str | None) -> datetime | None:
-    """Parse an ISO date string."""
+    """Parse ISO date strings into datetime objects. Return None if empty."""
     if value is None:
         return None
     return datetime.fromisoformat(value)
@@ -71,21 +71,21 @@ def parse_date(value: str | None) -> datetime | None:
 def resolve_mailboxes(
     config: Config, requested: list[str] | None
 ) -> list[tuple[str, MailboxConfig]]:
-    """Resolve mailbox names to configs, validating they exist."""
+    """Match requested mailboxes against config. Fails hard if missing."""
     names = requested or [next(iter(config.mailbox))]
     missing = [name for name in names if name not in config.mailbox]
     if missing:
-        raise ValueError(f"Mailbox not found in config: {', '.join(missing)}")
+        raise ValueError(f"Unknown mailbox requested: {', '.join(missing)}. Check your config TOML for valid mailbox names.")
     return [(name, config.mailbox[name]) for name in names]
 
 
 def resolve_folders(requested: list[str] | None) -> list[str]:
-    """Resolve folders to search, defaulting to INBOX."""
+    """Return requested folders or default to INBOX."""
     return requested or list(DEFAULT_FOLDERS)
 
 
 def build_search_criteria(params: AskParams) -> SearchCriteria:
-    """Build search criteria from params."""
+    """Map CLI parameters to a SearchCriteria object."""
     return SearchCriteria(
         query=params.search_query,
         date_from=params.date_from,
@@ -104,7 +104,7 @@ def fetch_emails(
     max_emails: int | None = None,
     on_progress: Callable[[], None] | None = None,
 ) -> FetchResult:
-    """Fetch emails from all mailboxes."""
+    """Pull emails sequentially from configured mailboxes matching search criteria."""
     all_emails: list[Email] = []
     counts: dict[str, int] = defaultdict(int)
 
@@ -147,7 +147,7 @@ def process_emails_individual(
     on_progress: Callable[[], None] | None = None,
     on_write: Callable[[Path], None] | None = None,
 ) -> None:
-    """Process emails individually (non-batch mode)."""
+    """Send emails to the LLM one by one. Slower but more precise."""
     for email in emails:
         content = processor.process_thread([email]) if thread else processor.process(email)
         for response in llm.process_batch(parse_query, [content]):
@@ -168,7 +168,7 @@ def process_emails_batch(
     on_progress: Callable[[], None] | None = None,
     on_write: Callable[[Path], None] | None = None,
 ) -> None:
-    """Process emails in batches."""
+    """Group emails to minimize LLM round-trips. Flushes when batch_size is met."""
     batch_contents: list[str] = []
     batch_emails: list[Email] = []
 
@@ -197,10 +197,10 @@ def process_emails_batch(
 
 
 def run_ask(params: AskParams, callbacks: RunCallbacks | None = None) -> Path:
-    """
-    Run the ask command.
-
-    Returns the output directory path.
+    """Execute the core extraction loop synchronously.
+    
+    Pulls emails, builds prompts, fires LLM queries, and writes JSONL outputs.
+    Returns the path where results are saved.
     """
     cb = callbacks or RunCallbacks()
     load_dotenv()
@@ -264,7 +264,7 @@ def run_ask(params: AskParams, callbacks: RunCallbacks | None = None) -> Path:
 
 @dataclass
 class RunCallbacks:
-    """Callbacks for run_ask progress reporting."""
+    """Hooks to update UI and terminal progress bars during synchronous runs."""
 
     on_fetch_start: Callable[[], None] = lambda: None
     on_fetch_progress: Callable[[], None] = lambda: None
@@ -278,7 +278,7 @@ class RunCallbacks:
 
 @dataclass
 class AsyncRunCallbacks:
-    """Callbacks for run_ask_async progress reporting with concurrent updates."""
+    """Hooks to update UI and terminal progress bars during async concurrent runs."""
 
     on_fetch_start: Callable[[], None] = lambda: None
     on_fetch_progress: Callable[[int, str], None] = lambda count, mailbox: None
@@ -299,14 +299,13 @@ class AsyncRunCallbacks:
 async def run_ask_async(
     params: AskParams, callbacks: AsyncRunCallbacks | None = None
 ) -> tuple[Path, PipelineStats]:
-    """
-    Run the ask command using the async producer-consumer pipeline.
-
-    This version fetches emails concurrently with LLM processing,
-    providing better throughput and real-time output.
+    """Execute the extraction loop asynchronously.
+    
+    Streams emails into a producer-consumer pipeline so LLM processing 
+    starts before fetching finishes. Maximizes throughput.
 
     Returns:
-        Tuple of (output directory path, pipeline statistics)
+        Tuple containing the output directory path and performance statistics.
     """
     cb = callbacks or AsyncRunCallbacks()
     load_dotenv()
@@ -366,9 +365,8 @@ async def run_ask_async(
 def run_ask_with_pipeline(
     params: AskParams, callbacks: AsyncRunCallbacks | None = None
 ) -> tuple[Path, PipelineStats]:
-    """
-    Synchronous wrapper for run_ask_async.
-
-    Use this when you want the new pipeline behavior from sync code.
+    """Wrap run_ask_async for synchronous callers.
+    
+    Use this to get concurrent throughput benefits without adopting asyncio.
     """
     return asyncio.run(run_ask_async(params, callbacks))

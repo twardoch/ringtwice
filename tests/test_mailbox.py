@@ -5,6 +5,8 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+from googleapiclient.errors import HttpError
+from tenacity import Retrying, retry_if_exception, stop_after_attempt, wait_fixed
 
 from ringtwice.config import MailboxConfig
 from ringtwice.mailbox import (
@@ -105,7 +107,15 @@ class TestGmailBackend:
         creds_file = tmp_path / "creds.json"
         creds_file.write_text("{}")
         with patch.object(GmailBackend, "_build_service", return_value=MagicMock()):
-            return GmailBackend(creds_file)
+            backend = GmailBackend(creds_file)
+            # Speed up retries in tests
+            backend._retryer = Retrying(
+                stop=stop_after_attempt(3),
+                wait=wait_fixed(0),
+                retry=retry_if_exception(backend._is_retryable_exception),
+                reraise=True,
+            )
+            return backend
 
     def test_build_query_empty(self, gmail_backend: GmailBackend) -> None:
         """Test empty criteria builds empty query."""
@@ -150,6 +160,35 @@ class TestGmailBackend:
         )
         result = gmail_backend.get_thread(email)
         assert result == [email]
+
+    def test_retryable_http_error(self, gmail_backend: GmailBackend) -> None:
+        """HttpError with transient status should be retried."""
+        resp = MagicMock()
+        resp.status = 503
+        exc = HttpError(resp=resp, content=b"oops")
+        assert gmail_backend._is_retryable_exception(exc)
+
+    def test_non_retryable_http_error(self, gmail_backend: GmailBackend) -> None:
+        """HttpError with client status should not retry."""
+        resp = MagicMock()
+        resp.status = 404
+        exc = HttpError(resp=resp, content=b"nope")
+        assert not gmail_backend._is_retryable_exception(exc)
+
+    def test_execute_with_retry_recovers(self, gmail_backend: GmailBackend) -> None:
+        """Execute function retries until success."""
+        attempts = 0
+
+        def flaky() -> dict[str, str]:
+            nonlocal attempts
+            attempts += 1
+            if attempts < 3:
+                raise TimeoutError("temporary")
+            return {"ok": "yes"}
+
+        result = gmail_backend._execute_with_retry(flaky)
+        assert attempts == 3
+        assert result == {"ok": "yes"}
 
 
 class TestCreateBackend:

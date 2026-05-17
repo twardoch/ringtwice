@@ -1,42 +1,42 @@
 # ringtwice
 
-> The postman always rings twice
+> The postman always rings twice.
 
-A CLI tool that processes emails with LLMs. Fetch emails from Gmail or IMAP, clean them up, send them to any OpenAI-compatible LLM, and save the results.
+Pipe your inbox through an LLM. **ringtwice** grabs emails from Gmail or IMAP, strips away the HTML and signature clutter, feeds the clean text to any OpenAI-compatible LLM, and dumps the parsed insights to disk.
 
 ## Quick Start
 
 ```bash
-# Install
+# Install system-wide
 uv pip install --system -e .
 
-# Or with virtual environment
+# Or inside a virtual environment
 uv venv && uv sync
 uv run ringtwice --help
 ```
 
 ```bash
-# Run
+# Example: Summarize recent emails
 ringtwice ask "Extract all action items and deadlines" --max-emails 5
 ```
 
-## What it does
+## How It Works
 
-1. **Fetches emails** from Gmail (via API) or any IMAP server
-2. **Cleans** email content: converts HTML to text, removes signatures and quoted replies
-3. **Sends** to any OpenAI-compatible LLM with your prompt
-4. **Saves** results as JSONL files
+1. **Fetch**: Connects to Gmail (via API) or any IMAP server.
+2. **Scrub**: Drops HTML formatting, quoted replies, and signatures to save context tokens.
+3. **Parse**: Streams the clean text plus your prompt to the LLM (OpenAI, Ollama, vLLM, etc.).
+4. **Dump**: Saves the extracted data as JSONL files.
 
 ## Documentation
 
-| Document | Description |
+| Guide | What's Inside |
 |----------|-------------|
-| [Installation](src_docs/installation.md) | Setup, requirements, and quick start |
-| [Gmail Setup](src_docs/gmail.md) | Step-by-step Gmail API configuration |
-| [CLI Usage](src_docs/cli.md) | Command-line options and examples |
-| [Configuration](src_docs/configuration.md) | Config file format and options |
-| [Python API](src_docs/python-api.md) | Using ringtwice as a library |
-| [Development](src_docs/development.md) | Contributing and extending |
+| [Installation](src_docs/installation.md) | Setup, requirements, and basic testing. |
+| [Gmail Setup](src_docs/gmail.md) | How to wrangle Google's OAuth requirements. |
+| [CLI Usage](src_docs/cli.md) | Flags, arguments, and practical examples. |
+| [Configuration](src_docs/configuration.md) | How to map mailboxes and define LLM endpoints. |
+| [Python API](src_docs/python-api.md) | Using ringtwice within your own Python scripts. |
+| [Development](src_docs/development.md) | Running tests, extending the code, and contributing. |
 
 ## License
 

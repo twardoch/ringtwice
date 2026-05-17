@@ -1,4 +1,4 @@
-"""CLI entry point using Fire."""
+"""Terminal interface. Maps command line arguments to pipeline execution."""
 
 from __future__ import annotations
 
@@ -41,7 +41,7 @@ console = Console(width=80, soft_wrap=True)
 
 @dataclass
 class ProgressState:
-    """Holds progress bars and task IDs for callbacks."""
+    """Terminal UI state for synchronous progress bars."""
 
     fetch_progress: Progress | None = None
     fetch_task: TaskID | None = None
@@ -50,7 +50,7 @@ class ProgressState:
 
 
 def _make_callbacks() -> tuple[RunCallbacks, ProgressState]:
-    """Create callbacks with Rich progress bars (legacy synchronous mode)."""
+    """Wire up terminal output for the legacy synchronous pipeline."""
     progress_state = ProgressState()
 
     def on_fetch_start() -> None:
@@ -132,7 +132,7 @@ def _make_callbacks() -> tuple[RunCallbacks, ProgressState]:
 
 @dataclass
 class AsyncProgressState:
-    """Holds state for concurrent pipeline progress display."""
+    """Terminal UI state tracking concurrent fetching and LLM processing."""
 
     lock: threading.Lock = field(default_factory=threading.Lock)
     live: Live | None = None
@@ -158,7 +158,7 @@ class AsyncProgressState:
 
 
 def _make_async_callbacks() -> tuple[AsyncRunCallbacks, AsyncProgressState]:
-    """Create callbacks for async pipeline with concurrent progress display."""
+    """Wire up live terminal updates for the async producer-consumer pipeline."""
     state = AsyncProgressState()
 
     # Create progress bars for fetch and process
@@ -182,7 +182,7 @@ def _make_async_callbacks() -> tuple[AsyncRunCallbacks, AsyncProgressState]:
     state.process_progress = process_progress
 
     def create_layout() -> Group:
-        """Create the layout for concurrent display."""
+        """Build the multi-line terminal output layout."""
         # Build status lines
         fetch_status = (
             f"[cyan]Fetched: {state.emails_fetched} emails"
@@ -353,7 +353,7 @@ def _make_async_callbacks() -> tuple[AsyncRunCallbacks, AsyncProgressState]:
 
 
 def _show_config(config_file: Path | None = None) -> None:
-    """Display the resolved config path and parsed content."""
+    """Print active configuration and test mailbox connections."""
     from dotenv import load_dotenv
 
     load_dotenv()
@@ -408,7 +408,7 @@ def _show_config(config_file: Path | None = None) -> None:
 
 
 class RingtwiceCLI:
-    """Ringtwice CLI - process emails with LLMs."""
+    """Command-line interface to extract insights from your inbox."""
 
     def ask(
         self,
@@ -430,30 +430,29 @@ class RingtwiceCLI:
         subject: str | None = None,
         legacy: bool = False,
     ) -> None:
-        """
-        Process emails with an LLM.
-
-        Uses a concurrent pipeline that fetches emails while processing with LLM,
-        showing progress for both operations in real-time.
+        """Stream emails to an LLM for parsing or extraction.
+        
+        Pulls messages matching your search criteria and feeds them to an LLM 
+        alongside your prompt. Results save as JSONL files.
 
         Args:
-            parse_query: LLM prompt to apply to emails (required)
-            search_query: Email search text
-            folders: Comma-separated folders/labels to search (defaults to INBOX)
-            in_sent: Shortcut to search Sent mail (same as --folders sent)
-            thread: Retrieve full threads vs individual emails
-            max_emails: Limit number of emails to process
-            boxes: Mailbox names to search (from config)
-            batch: Combine emails before sending to LLM
-            batch_size: Number of emails per batch (default: fit to context)
-            output_dir: Directory for JSONL output files
-            config_file: Path to config TOML file
-            date_from: Filter emails after this date (YYYY-MM-DD)
-            date_to: Filter emails before this date (YYYY-MM-DD)
-            sender: Filter by sender (comma-separated for multiple)
-            recipient: Filter by recipient (comma-separated for multiple)
-            subject: Filter by subject substring
-            legacy: Use legacy synchronous mode (fetch all, then process)
+            parse_query: What the LLM should extract or answer (Required)
+            search_query: Text to match in the mailbox
+            folders: Comma-separated folder names. Defaults to INBOX
+            in_sent: Search the 'sent' folder
+            thread: Group messages by conversation
+            max_emails: Stop fetching after N emails
+            boxes: Specific mailboxes to query (must exist in config)
+            batch: Send multiple emails to the LLM at once
+            batch_size: Override automatic batch sizing
+            output_dir: Where to drop the JSONL results
+            config_file: Override the default config location
+            date_from: Only match emails after this date (YYYY-MM-DD)
+            date_to: Only match emails before this date (YYYY-MM-DD)
+            sender: Comma-separated sender addresses
+            recipient: Comma-separated recipient addresses
+            subject: Substring to match in the subject line
+            legacy: Force older sync behavior instead of concurrent streaming
         """
         folder_list = split_csv(folders)
         if in_sent and not folder_list:
@@ -487,11 +486,10 @@ class RingtwiceCLI:
             run_ask_with_pipeline(params, async_callbacks)
 
     def config(self, config_file: str | None = None) -> None:
-        """
-        Show the config path and parsed values.
+        """Test mailbox connections and print current configuration.
 
         Args:
-            config_file: Path to config TOML file (optional)
+            config_file: Path to override the default config location
         """
         _show_config(Path(config_file) if config_file else None)
 
@@ -515,7 +513,7 @@ def ask(
     subject: str | None = None,
     legacy: bool = False,
 ) -> None:
-    """Standalone function for backwards compatibility and direct imports."""
+    """Fire the CLI ask command directly. Kept for legacy callers."""
     cli = RingtwiceCLI()
     cli.ask(
         parse_query=parse_query,
@@ -539,12 +537,12 @@ def ask(
 
 
 def show_config(config_file: str | None = None) -> None:
-    """Standalone function for backwards compatibility."""
+    """Fire the CLI config command directly. Kept for legacy callers."""
     _show_config(Path(config_file) if config_file else None)
 
 
 def main() -> None:
-    """Entry point for the CLI."""
+    """Launch the Fire CLI."""
     fire.Fire(RingtwiceCLI)
 
 

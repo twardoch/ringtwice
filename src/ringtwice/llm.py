@@ -1,4 +1,4 @@
-"""LLM client for OpenAI-compatible endpoints."""
+"""Connects to LLMs matching the OpenAI API spec (Ollama, vLLM, OpenAI)."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from ringtwice.config import LLMConfig
 
 @dataclass
 class LLMResponse:
-    """Response from LLM."""
+    """The raw text and token usage metrics returned by the LLM."""
 
     content: str
     model: str
@@ -24,7 +24,7 @@ class LLMResponse:
 
 
 class LLMClient:
-    """Client for OpenAI-compatible LLM endpoints."""
+    """Handles prompt chunking and HTTP requests to OpenAI-compatible APIs."""
 
     def __init__(self, config: LLMConfig) -> None:
         self._config = config
@@ -43,11 +43,11 @@ class LLMClient:
         self._splitter = TextSplitter(max_content_tokens)
 
     def count_tokens(self, text: str) -> int:
-        """Count tokens in text."""
+        """Measure precise token count using tiktoken encoding."""
         return len(self._tokenizer.encode(text))
 
     def split_for_context(self, text: str) -> list[str]:
-        """Split text to fit within context window."""
+        """Chop large text blocks into pieces that safely fit the LLM context window."""
         return self._splitter.chunks(text)
 
     @retry(
@@ -71,7 +71,7 @@ class LLMClient:
         )
 
     def process_batch(self, prompt: str, contents: list[str]) -> Iterator[LLMResponse]:
-        """Process multiple content pieces, respecting context limits."""
+        """Combine multiple emails into a single prompt, avoiding the context limit ceiling."""
         for content in contents:
             chunks = self.split_for_context(content)
             for chunk in chunks:

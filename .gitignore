@@ -89,3 +89,4 @@ venv.bak/
 venv/
 wheels/
 src/ringtwice/_version.py
+external/

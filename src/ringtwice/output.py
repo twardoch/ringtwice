@@ -1,4 +1,4 @@
-"""Output handling: save LLM responses as JSONL files."""
+"""Dumps LLM results to disk in JSONL format."""
 
 from __future__ import annotations
 
@@ -36,7 +36,7 @@ EMPTY_RESPONSE_PATTERNS = [
 
 
 def is_empty_response(content: str) -> bool:
-    """Check if LLM response is empty or indicates no relevant content."""
+    """Return True if the LLM yielded nothing useful (e.g. empty string or {})."""
     if not content:
         return True
 
@@ -56,7 +56,7 @@ def is_empty_response(content: str) -> bool:
 
 
 def extract_email_address(sender: str) -> str:
-    """Extract just the email address from a sender string like 'Name <email@example.com>'."""
+    """Strip names from 'Name <email@example.com>' and return just the address."""
     match = re.search(r"<([^>]+)>", sender)
     if match:
         return match.group(1)
@@ -67,14 +67,14 @@ def extract_email_address(sender: str) -> str:
 
 
 def truncate(text: str, max_length: int = 30) -> str:
-    """Truncate text to max_length, adding ellipsis if needed."""
+    """Chop strings that exceed max_length and append '...'."""
     if len(text) <= max_length:
         return text
     return text[: max_length - 1] + "…"
 
 
 def format_email_header(email: Email, max_subject: int = 30) -> str:
-    """Format email header as: YYYY-MM-DD HH:MM | sender@email.com | Subject truncated"""
+    """Build a one-line summary: YYYY-MM-DD HH:MM | sender | Subject."""
     timestamp = email.date.strftime("%Y-%m-%d %H:%M")
     sender = extract_email_address(email.sender)
     subject = truncate(email.subject, max_subject)
@@ -82,7 +82,7 @@ def format_email_header(email: Email, max_subject: int = 30) -> str:
 
 
 def format_batch_header(emails: list[Email], max_subject: int = 25) -> str:
-    """Format batch header with first few emails."""
+    """Summarize a batch of emails. Lists the first few, notes the rest."""
     if not emails:
         return "Batch: (empty)"
 
@@ -98,7 +98,7 @@ def format_batch_header(emails: list[Email], max_subject: int = 25) -> str:
 
 
 def get_output_filename(email: Email) -> str:
-    """Generate output filename from email metadata."""
+    """Construct a filesystem-safe string from the date, sender, and subject."""
     timestamp = email.date.strftime("%y%m%d-%H%M%S")
     sender = slugify(email.sender.split("@")[0], max_length=20)
     subject = slugify(email.subject, max_length=30)
@@ -107,13 +107,13 @@ def get_output_filename(email: Email) -> str:
 
 
 def get_default_output_dir() -> Path:
-    """Create default output directory with timestamp inside outputs/."""
+    """Build a timestamped folder inside outputs/ to hold the run's JSONL files."""
     timestamp = datetime.now().strftime("%y%m%d-%H%M%S")
     return Path.cwd() / "output" / f"{timestamp}"
 
 
 class OutputWriter:
-    """Writes LLM responses to JSONL files."""
+    """Serializes LLM insights into line-delimited JSON."""
 
     def __init__(self, output_dir: Path, max_width: int = 70) -> None:
         self._output_dir = output_dir
@@ -123,11 +123,11 @@ class OutputWriter:
 
     @property
     def skipped_count(self) -> int:
-        """Number of responses skipped due to empty/irrelevant content."""
+        """Total ignored responses due to irrelevance or emptiness."""
         return self._skipped_count
 
     def _wrap_content(self, content: str) -> str:
-        """Wrap long lines in content."""
+        """Hard-wrap text to 80 characters for readability."""
         lines = []
         for line in content.split("\n"):
             if len(line) > self._max_width:
@@ -138,9 +138,9 @@ class OutputWriter:
         return "\n".join(lines)
 
     def write(self, email: Email, response: LLMResponse) -> Path | None:
-        """Write single response to JSONL file.
-
-        Returns None if response was empty/irrelevant and skipped.
+        """Append an email and its LLM response to a JSONL file.
+        
+        Returns the file path, or None if the response was empty.
         """
         # Skip empty responses
         if is_empty_response(response.content):
@@ -173,9 +173,9 @@ class OutputWriter:
         return filepath
 
     def write_batch(self, emails: list[Email], response: LLMResponse) -> Path | None:
-        """Write batch response to JSONL file.
-
-        Returns None if response was empty/irrelevant and skipped.
+        """Append a batch of emails and their combined LLM response to a JSONL file.
+        
+        Returns the file path, or None if the response was empty.
         """
         # Skip empty responses
         if is_empty_response(response.content):

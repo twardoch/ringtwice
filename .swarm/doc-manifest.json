@@ -1,0 +1,195 @@
+{
+  "schema_version": 1,
+  "scanned_at": "2026-04-07T22:34:02.083Z",
+  "files": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "title": "ci.yml",
+      "summary": "name: CI on: push: branches: [main] pull_request: branches: [main] concurrency: group: ${{ github.workflow }}-${{ github.ref }} cancel-in-progress: true env: FORCE_COLOR: \"1\" UV_SYSTEM_PYTHON: \"1\" ...",
+      "lines": 130,
+      "mtime": 1765003336802
+    },
+    {
+      "path": ".github/workflows/docs.yml",
+      "title": "docs.yml",
+      "summary": "name: Documentation on: push: branches: [main] paths: - \"docs/**\" - \"README.md\" - \"GMAIL.md\" - \"mkdocs.yml\" - \".github/workflows/docs.yml\" pull_request: branches: [main] paths: - \"docs/**\" - \"READM...",
+      "lines": 83,
+      "mtime": 1765003850772
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "title": "release.yml",
+      "summary": "name: Release on: push: tags: - \"v*\" permissions: contents: write id-token: write env: FORCE_COLOR: \"1\" UV_SYSTEM_PYTHON: \"1\" jobs: build: name: Build Package runs-on: ubuntu-latest steps: - uses: ...",
+      "lines": 132,
+      "mtime": 1765003354164
+    },
+    {
+      "path": ".pytest_cache/README.md",
+      "title": "pytest cache directory #",
+      "summary": "This directory contains data from the pytest's cache plugin, which provides the `--lf` and `--ff` options, as well as the `cache` fixture. **Do not** commit this to version control. See [the docs](...",
+      "lines": 9,
+      "mtime": 1765003061291
+    },
+    {
+      "path": ".venv/lib/python3.13/site-packages/fire/console/README.md",
+      "title": "README.md",
+      "summary": "This is the console package from googlecloudsdk, as used by Python Fire. Python Fire does not accept pull requests modifying the console package; rather, changes to console should go through the up...",
+      "lines": 4,
+      "mtime": 1764997491597
+    },
+    {
+      "path": "CLAUDE.md",
+      "title": "CLAUDE.md",
+      "summary": "This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository. `ringtwice` is a Python 3.13 Fire CLI tool that: - Connects to GMail (preferred) or IMAP mailb...",
+      "lines": 118,
+      "mtime": 1765006297415
+    },
+    {
+      "path": "docs/.DS_Store",
+      "title": ".DS_Store",
+      "summary": "\u0000\u0000\u0000\u0001Bud1\u0000\u0000\u0018\u0000\u0000\u0000\b\u0000\u0000\u0000\u0018\u0000\u0000\u0000\u0010\u000b\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\b\u0000\u0000\u0000\b\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u001c\u0000\u0000\u0000\u0001\u0000\u0000\u0010\u0000\u0000t\u0000slg1Scomp\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000...",
+      "lines": 17,
+      "mtime": 1775601166757
+    },
+    {
+      "path": "docs/.nojekyll",
+      "title": ".nojekyll",
+      "summary": "",
+      "lines": 1,
+      "mtime": 1765006521307
+    },
+    {
+      "path": "docs/404.html",
+      "title": "404.html",
+      "summary": "<!doctype html> <html lang=\"en\" class=\"no-js\"> <head> <meta charset=\"utf-8\"> <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"> <meta name=\"description\" content=\"CLI tool to proces...",
+      "lines": 552,
+      "mtime": 1765006776791
+    },
+    {
+      "path": "docs/assets/.DS_Store",
+      "title": ".DS_Store",
+      "summary": "\u0000\u0000\u0000\u0001Bud1\u0000\u0000\u0010\u0000\u0000\u0000\b\u0000\u0000\u0000\u0010\u0000\u0000\u0000\u0002\t\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\b\u0000\u0000\u0000\b\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0000\f\u0000\u0000\u0000\u0001\u0000\u0000\u0010\u0000\u0000e\u0000slg1Scomp\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000...",
+      "lines": 7,
+      "mtime": 1775600940466
+    },
+    {
+      "path": "docs/assets/images/favicon.png",
+      "title": "favicon.png",
+      "summary": "�PNG \u001a \u0000\u0000\u0000\rIHDR\u0000\u0000\u00000\u0000\u0000\u00000\b\u0006\u0000\u0000\u0000W\u0002��\u0000\u0000\u0007\u0015IDATx�ŗ�OTW\u0010��\u0003/�7^T@~�*\u0002��*?EDEda��,�\u000fR�Ml��66�V\u0013k�\u0005e�\u001a��M�'H���hcc\u0013\u0001UAe}^,Y�a���=��ܽ�*��|�33��\u001c��]�|X���\t�HY� \u0000\u001d��A_E\u0018�z\u0004\u001a��Hm����8%%\u0019C�J[��\u0012�IKI!(ie�guc����\u001f...",
+      "lines": 8,
+      "mtime": 1765003550410
+    },
+    {
+      "path": "docs/assets/javascripts/bundle.21aa498e.min.js",
+      "title": "bundle.21aa498e.min.js",
+      "summary": "\"use strict\";(()=>{var yc=Object.create;var Ln=Object.defineProperty,xc=Object.defineProperties,wc=Object.getOwnPropertyDescriptor,Ec=Object.getOwnPropertyDescriptors,Tc=Object.getOwnPropertyNames,...",
+      "lines": 4,
+      "mtime": 1765003550410
+    },
+    {
+      "path": "docs/assets/javascripts/workers/search.5df7522c.min.js",
+      "title": "search.5df7522c.min.js",
+      "summary": "\"use strict\";(()=>{var ge=Object.create;var K=Object.defineProperty,me=Object.defineProperties,xe=Object.getOwnPropertyDescriptor,ye=Object.getOwnPropertyDescriptors,ve=Object.getOwnPropertyNames,W...",
+      "lines": 2,
+      "mtime": 1765003550410
+    },
+    {
+      "path": "docs/assets/stylesheets/classic/main.59dc44d5.min.css",
+      "title": "main.59dc44d5.min.css",
+      "summary": "@charset \"UTF-8\";html{-webkit-text-size-adjust:none;-moz-text-size-adjust:none;text-size-adjust:none;box-sizing:border-box}*,:after,:before{box-sizing:inherit}@media (prefers-reduced-motion){*,:aft...",
+      "lines": 1,
+      "mtime": 1765003550411
+    },
+    {
+      "path": "docs/assets/stylesheets/classic/palette.7dc9a0ad.min.css",
+      "title": "palette.7dc9a0ad.min.css",
+      "summary": "@media screen{[data-md-color-scheme=slate]{--md-default-fg-color:hsla(var(--md-hue),15%,90%,0.82);--md-default-fg-color--light:hsla(var(--md-hue),15%,90%,0.56);--md-default-fg-color--lighter:hsla(v...",
+      "lines": 1,
+      "mtime": 1765003550410
+    },
+    {
+      "path": "docs/assets/stylesheets/modern/main.bd6182e7.min.css",
+      "title": "main.bd6182e7.min.css",
+      "summary": "@charset \"UTF-8\";html{-webkit-text-size-adjust:none;-moz-text-size-adjust:none;text-size-adjust:none;box-sizing:border-box}*,:after,:before{box-sizing:inherit}@media (prefers-reduced-motion){*,:aft...",
+      "lines": 1,
+      "mtime": 1765003550411
+    },
+    {
+      "path": "docs/assets/stylesheets/modern/palette.dfe2e883.min.css",
+      "title": "palette.dfe2e883.min.css",
+      "summary": "@media screen{[data-md-color-scheme=slate]{--md-default-fg-color:hsla(var(--md-hue),15%,90%,0.82);--md-default-fg-color--light:hsla(var(--md-hue),15%,90%,0.56);--md-default-fg-color--lighter:hsla(v...",
+      "lines": 1,
+      "mtime": 1765003550411
+    },
+    {
+      "path": "docs/cli/index.html",
+      "title": "index.html",
+      "summary": "<!doctype html> <html lang=\"en\" class=\"no-js\"> <head> <meta charset=\"utf-8\"> <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"> <meta name=\"description\" content=\"CLI tool to proces...",
+      "lines": 990,
+      "mtime": 1765006776792
+    },
+    {
+      "path": "docs/configuration/index.html",
+      "title": "index.html",
+      "summary": "<!doctype html> <html lang=\"en\" class=\"no-js\"> <head> <meta charset=\"utf-8\"> <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"> <meta name=\"description\" content=\"CLI tool to proces...",
+      "lines": 887,
+      "mtime": 1765006776792
+    },
+    {
+      "path": "docs/development/index.html",
+      "title": "index.html",
+      "summary": "<!doctype html> <html lang=\"en\" class=\"no-js\"> <head> <meta charset=\"utf-8\"> <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"> <meta name=\"description\" content=\"CLI tool to proces...",
+      "lines": 871,
+      "mtime": 1765006776792
+    },
+    {
+      "path": "docs/gmail/index.html",
+      "title": "index.html",
+      "summary": "<!doctype html> <html lang=\"en\" class=\"no-js\"> <head> <meta charset=\"utf-8\"> <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"> <meta name=\"description\" content=\"CLI tool to proces...",
+      "lines": 1400,
+      "mtime": 1765006776792
+    },
+    {
+      "path": "docs/index.html",
+      "title": "index.html",
+      "summary": "<!doctype html> <html lang=\"en\" class=\"no-js\"> <head> <meta charset=\"utf-8\"> <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"> <meta name=\"description\" content=\"CLI tool to proces...",
+      "lines": 785,
+      "mtime": 1765006776792
+    },
+    {
+      "path": "docs/installation/index.html",
+      "title": "index.html",
+      "summary": "<!doctype html> <html lang=\"en\" class=\"no-js\"> <head> <meta charset=\"utf-8\"> <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"> <meta name=\"description\" content=\"CLI tool to proces...",
+      "lines": 874,
+      "mtime": 1765006776792
+    },
+    {
+      "path": "docs/python-api/index.html",
+      "title": "index.html",
+      "summary": "<!doctype html> <html lang=\"en\" class=\"no-js\"> <head> <meta charset=\"utf-8\"> <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"> <meta name=\"description\" content=\"CLI tool to proces...",
+      "lines": 914,
+      "mtime": 1765006776792
+    },
+    {
+      "path": "docs/search.json",
+      "title": "search.json",
+      "summary": "{\"config\":{\"separator\":\"[\\\\s\\\\-_,:!=\\\\[\\\\]()\\\\\\\\\\\"`/]+|\\\\.(?!\\\\d)\"},\"items\":[{\"location\":\"\",\"level\":1,\"title\":\"ringtwice\",\"text\":\"<p>The postman always rings twice</p> <p>A CLI tool that processes ...",
+      "lines": 1,
+      "mtime": 1765006776787
+    },
+    {
+      "path": "docs/sitemap.xml",
+      "title": "sitemap.xml",
+      "summary": "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"> <url> <loc>https://twardoch.github.io/ringtwice/</loc> </url> <url> <loc>https://twardoch.github....",
+      "lines": 24,
+      "mtime": 1765006776789
+    },
+    {
+      "path": "README.md",
+      "title": "ringtwice",
+      "summary": "> The postman always rings twice A CLI tool that processes emails with LLMs. Fetch emails from Gmail or IMAP, clean them up, send them to any OpenAI-compatible LLM, and save the results. ```bash uv...",
+      "lines": 44,
+      "mtime": 1765004357350
+    }
+  ]
+}

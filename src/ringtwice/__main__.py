@@ -1,4 +1,4 @@
-"""ringtwice module entrypoint."""
+"""Module entry point for python -m ringtwice."""
 
 from ringtwice.cli import main
 

@@ -648,25 +648,10 @@ async def run_pipeline(
     num_workers: int = 1,
     callbacks: PipelineCallbacks | None = None,
 ) -> PipelineStats:
-    """Convenience function to run the pipeline.
-
-    Args:
-        mailbox_configs: List of (name, config) tuples for mailboxes
-        criteria: Search criteria for emails
-        llm: LLM client instance
-        writer: Output writer instance
-        processor: Email processor instance
-        parse_query: LLM prompt to use
-        thread: Whether to fetch full threads
-        max_emails: Maximum number of emails to process
-        batch: Whether to batch emails
-        batch_size: Size of batches when batching
-        buffer_multiplier: How many LLM contexts worth of data to buffer
-        num_workers: Number of concurrent LLM workers
-        callbacks: Progress callbacks
+    """Wire dependencies and block until the extraction finishes.
 
     Returns:
-        Statistics about the pipeline run
+        Performance metrics tracked over the pipeline lifecycle.
     """
     pipeline = Pipeline(
         mailbox_configs=mailbox_configs,

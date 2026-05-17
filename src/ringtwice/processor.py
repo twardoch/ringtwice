@@ -1,4 +1,4 @@
-"""Email minification: remove HTML, quotes, and signatures."""
+"""Mail cleaner. Strips HTML, signatures, and reply trails to save tokens."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from ringtwice.mailbox import Email
 
 
 class EmailProcessor:
-    """Minifies emails by removing HTML, quotes, signatures."""
+    """Uses talon to strip email clutter before feeding text to the LLM."""
 
     def __init__(self, languages: list[str] | None = None) -> None:
         self._languages = languages or ["en"]
@@ -19,7 +19,7 @@ class EmailProcessor:
         self._html2text.body_width = 0  # Don't wrap
 
     def process(self, email: Email) -> str:
-        """Process email to clean text."""
+        """Strip HTML, signatures, and quotes from a single email."""
         # Get text content
         if email.text:
             text = email.text
@@ -44,7 +44,7 @@ class EmailProcessor:
         return text.strip()
 
     def process_thread(self, emails: list[Email]) -> str:
-        """Process a thread of emails into combined text."""
+        """Combine multiple emails into a single chronological transcript."""
         parts = []
         for email in emails:
             header = f"From: {email.sender}\nDate: {email.date}\nSubject: {email.subject}\n"

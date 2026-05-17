@@ -1,4 +1,4 @@
-"""Configuration loading with TOML and environment variable interpolation."""
+"""Loads settings from TOML files and interpolates environment variables."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 
 
 class LLMConfig(BaseModel):
-    """LLM endpoint configuration."""
+    """Configuration mapping for the LLM API endpoint."""
 
     endpoint: str
     api_key: str
@@ -22,7 +22,7 @@ class LLMConfig(BaseModel):
 
 
 class MailboxConfig(BaseModel):
-    """Single mailbox configuration."""
+    """Credentials and connection details for a single IMAP or Gmail account."""
 
     type: Literal["gmail", "imap"]
     # Gmail-specific
@@ -35,18 +35,18 @@ class MailboxConfig(BaseModel):
 
 
 class Config(BaseModel):
-    """Root configuration model."""
+    """Top-level configuration tying mailboxes and LLMs together."""
 
     llm: LLMConfig
     mailbox: dict[str, MailboxConfig] = Field(min_length=1)
 
     @classmethod
     def load(cls, config_path: Path | None = None) -> Config:
-        """Load config from TOML file with env var interpolation."""
+        """Read TOML, replace ${ENV_VARS}, and return the validated config object."""
         path = config_path or get_default_config_path()
         path = Path(path).expanduser().resolve()
         if not path.exists():
-            raise FileNotFoundError(f"Config file not found: {path}")
+            raise FileNotFoundError(f"Missing config file: {path}. Create it at ~/.config/ringtwice/config.toml, or pass --config-file <path>.")
 
         config_dir = path.parent
 
@@ -74,14 +74,14 @@ class Config(BaseModel):
 
 
 def interpolate_env_vars(text: str) -> str:
-    """Replace ${VAR} with environment variable values, skipping comments."""
+    """Swap out ${VAR} for actual environment variables. Ignores # comments."""
     pattern = r"\$\{([^}]+)\}"
 
     def replacer(match: re.Match[str]) -> str:
         var_name = match.group(1)
         value = os.environ.get(var_name)
         if value is None:
-            raise ValueError(f"Environment variable {var_name} not set")
+            raise ValueError(f"Missing environment variable: {var_name}. Export it or add it to your .env file.")
         return value
 
     # Process line by line, skipping comments
@@ -96,5 +96,5 @@ def interpolate_env_vars(text: str) -> str:
 
 
 def get_default_config_path() -> Path:
-    """Return platform-appropriate config path."""
+    """Find the default config file location depending on the OS."""
     return Path(user_config_dir("ringtwice")) / "config.toml"
