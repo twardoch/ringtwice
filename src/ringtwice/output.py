@@ -115,9 +115,12 @@ def get_default_output_dir() -> Path:
 class OutputWriter:
     """Serializes LLM insights into line-delimited JSON."""
 
-    def __init__(self, output_dir: Path, max_width: int = 70) -> None:
+    def __init__(self, output_dir: Path, max_width: int = 70, dry_run: bool = False) -> None:
         self._output_dir = output_dir
-        self._output_dir.mkdir(parents=True, exist_ok=True)
+        self._dry_run = dry_run
+        # In dry-run mode skip directory creation — nothing will be written to disk.
+        if not dry_run:
+            self._output_dir.mkdir(parents=True, exist_ok=True)
         self._max_width = max_width
         self._skipped_count = 0
 
@@ -139,8 +142,9 @@ class OutputWriter:
 
     def write(self, email: Email, response: LLMResponse) -> Path | None:
         """Append an email and its LLM response to a JSONL file.
-        
-        Returns the file path, or None if the response was empty.
+
+        In dry-run mode the record is printed but never written to disk.
+        Returns the file path, or None if the response was empty or dry_run is set.
         """
         # Skip empty responses
         if is_empty_response(response.content):
@@ -162,20 +166,26 @@ class OutputWriter:
             "timestamp": datetime.now().isoformat(),
         }
 
-        with filepath.open("a") as f:
-            f.write(json.dumps(record) + "\n")
-
         # Print formatted response with better header
         header = format_email_header(email)
         content = self._wrap_content(response.content.strip())
         print(f"\n---\n{header}\n\n{content}\n")
 
+        if self._dry_run:
+            # Dry-run: show what would be written without touching disk.
+            print(f"[dry-run] would write: {filepath}")
+            return None
+
+        with filepath.open("a") as f:
+            f.write(json.dumps(record) + "\n")
+
         return filepath
 
     def write_batch(self, emails: list[Email], response: LLMResponse) -> Path | None:
         """Append a batch of emails and their combined LLM response to a JSONL file.
-        
-        Returns the file path, or None if the response was empty.
+
+        In dry-run mode the record is printed but never written to disk.
+        Returns the file path, or None if the response was empty or dry_run is set.
         """
         # Skip empty responses
         if is_empty_response(response.content):
@@ -201,12 +211,17 @@ class OutputWriter:
             "timestamp": datetime.now().isoformat(),
         }
 
-        with filepath.open("a") as f:
-            f.write(json.dumps(record) + "\n")
-
         # Print formatted response with better header
         header = format_batch_header(emails)
         content = self._wrap_content(response.content.strip())
         print(f"\n---\nBatch ({len(emails)} emails):\n{header}\n\n{content}\n")
+
+        if self._dry_run:
+            # Dry-run: show what would be written without touching disk.
+            print(f"[dry-run] would write: {filepath}")
+            return None
+
+        with filepath.open("a") as f:
+            f.write(json.dumps(record) + "\n")
 
         return filepath

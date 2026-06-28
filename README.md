@@ -37,18 +37,18 @@ Key sections:
 
 ```toml
 [llm]
-base_url = "https://api.openai.com/v1"
-api_key_env = "OPENAI_API_KEY"
-model = "gpt-4o-mini"
-max_context_tokens = 8192
+endpoint    = "${LLM_API_ENDPOINT}"   # e.g. https://api.openai.com/v1
+api_key     = "${LLM_API_KEY}"
+model       = "gpt-4o-mini"
+max_context = 8192
 
-[[mailboxes]]
-name = "work"
-type = "gmail"                      # or "imap"
-credentials_file = "~/.config/ringtwice/gmail_credentials.json"
+[mailbox.work]
+type             = "gmail"            # or "imap"
+credentials_file = "gmail_credentials.json"
 ```
 
 For Gmail, see [src_docs/gmail.md](src_docs/gmail.md) for the OAuth2 setup steps.
+For IMAP, see [src_docs/imap.md](src_docs/imap.md) for provider-specific settings.
 
 ## CLI reference
 
@@ -68,7 +68,7 @@ Options:
   --batch / --no-batch      Combine emails before sending to LLM
   --batch-size INT          Emails per LLM call when batching
   --output-dir PATH         Where to save JSONL files (default: ./output)
-  --verbose                 Debug logging
+  --dry-run                 Fetch and process but do NOT write files to disk
 ```
 
 **Examples:**
@@ -144,12 +144,13 @@ src/ringtwice/
 
 | Guide | Contents |
 |-------|----------|
-| [Installation](src_docs/installation.md) | Setup and requirements |
-| [Gmail Setup](src_docs/gmail.md) | OAuth2 credential creation |
-| [CLI Usage](src_docs/cli.md) | All flags with examples |
-| [Configuration](src_docs/configuration.md) | Config file reference |
-| [Python API](src_docs/python-api.md) | Library usage |
-| [Development](src_docs/development.md) | Tests and contributing |
+| [Installation](https://twardoch.github.io/ringtwice/installation/) | Setup and requirements |
+| [Gmail Setup](https://twardoch.github.io/ringtwice/gmail/) | OAuth2 credential creation |
+| [IMAP Quickstart](https://twardoch.github.io/ringtwice/imap/) | IMAP provider setup |
+| [CLI Usage](https://twardoch.github.io/ringtwice/cli/) | All flags with examples |
+| [Configuration](https://twardoch.github.io/ringtwice/configuration/) | Config file and JSONL schema reference |
+| [Python API](https://twardoch.github.io/ringtwice/python-api/) | Library usage |
+| [Development](https://twardoch.github.io/ringtwice/development/) | Tests and contributing |
 
 ## License
 

@@ -41,10 +41,17 @@ ringtwice/
 │   ├── cli.py          # Fire CLI entry point
 │   ├── config.py       # TOML config with env var interpolation
 │   ├── mailbox.py      # Gmail/IMAP email backends
+│   ├── pipeline.py     # Async producer-consumer pipeline
 │   ├── processor.py    # Email minification (HTML, quotes, signatures)
 │   ├── llm.py          # OpenAI-compatible LLM client
-│   └── output.py       # JSONL output writer
-├── tests/              # pytest tests (65 tests, 81% coverage)
+│   ├── output.py       # JSONL output writer
+│   └── runner.py       # Orchestration: fetch → process → write
+├── src_docs/           # MkDocs Material source pages
+│   ├── gmail.md        # OAuth2 setup walkthrough
+│   ├── imap.md         # IMAP quickstart (new)
+│   ├── configuration.md # Config reference + JSONL schema
+│   └── ...
+├── tests/              # pytest tests (108 tests, 81%+ coverage)
 ├── pyproject.toml      # uv/pip config
 └── config.example.toml # Example configuration
 ```
@@ -79,6 +86,7 @@ Key flags:
 - `--boxes` - Which mailboxes to search
 - `--batch` / `--batch-size` - Combine emails before sending to LLM
 - `--output-dir` - Where to save JSONL results
+- `--dry-run` - Fetch + LLM process but skip writing JSONL files to disk
 
 Output naming: `YYMMDD-HHMMSS-SENDEREMAIL-THREADSUBJECT.jsonl` (slugified)
 

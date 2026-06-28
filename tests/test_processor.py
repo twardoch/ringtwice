@@ -115,3 +115,60 @@ On Mon, Jan 1, 2024, someone wrote:
         processor = EmailProcessor(languages=["en", "de", "fr"])
         # Just verify it initializes without error
         assert processor._languages == ["en", "de", "fr"]
+
+
+class TestThreadGroupingEdgeCases:
+    """Edge-case tests for process_thread covering unusual but real-world inputs."""
+
+    def test_process_thread_missing_subject(self) -> None:
+        """Thread header is emitted even when Subject is an empty string."""
+        email = make_email(text="Hello", subject="")
+        processor = EmailProcessor()
+        result = processor.process_thread([email])
+        # Header line with empty subject should still be present
+        assert "Subject:" in result
+        assert "Hello" in result
+
+    def test_process_thread_no_reply_sender(self) -> None:
+        """no-reply addresses are included in the thread transcript unchanged."""
+        noreply = "no-reply@newsletter.example.com"
+        email = make_email(text="You have a new notification.", sender=noreply)
+        processor = EmailProcessor()
+        result = processor.process_thread([email])
+        assert noreply in result
+        assert "You have a new notification" in result
+
+    def test_process_thread_no_reply_stripped_when_solo(self) -> None:
+        """process() on a no-reply email returns body text, not empty string."""
+        email = make_email(
+            text="Click here to confirm your email.",
+            sender="noreply@service.example.com",
+        )
+        processor = EmailProcessor()
+        result = processor.process(email)
+        # Body should not vanish just because the sender is a no-reply address
+        assert result != ""
+        assert "confirm" in result
+
+    def test_process_thread_multiple_emails_missing_subject_in_some(self) -> None:
+        """Thread with mixed empty/non-empty subjects groups correctly."""
+        emails = [
+            make_email(text="First", subject="Initial thread"),
+            make_email(text="Second", subject=""),  # reply with no subject
+            make_email(text="Third", subject="Re: Initial thread"),
+        ]
+        processor = EmailProcessor()
+        result = processor.process_thread(emails)
+        assert "First" in result
+        assert "Second" in result
+        assert "Third" in result
+        # Separators should appear between messages
+        assert result.count("---") >= 2
+
+    def test_process_thread_sender_with_display_name_and_no_reply(self) -> None:
+        """Display-name variant of no-reply address is preserved in header."""
+        sender = "Newsletter <no-reply@example.com>"
+        email = make_email(text="This week's digest.", sender=sender)
+        processor = EmailProcessor()
+        result = processor.process_thread([email])
+        assert sender in result

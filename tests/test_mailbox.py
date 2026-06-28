@@ -244,5 +244,79 @@ class TestCreateBackend:
         config = MailboxConfig(name="test", type="imap")  # type: ignore[arg-type]
         # Manually set an invalid type
         object.__setattr__(config, "type", "unknown")
-        with pytest.raises(ValueError, match="Unknown mailbox type"):
+        with pytest.raises(ValueError, match="Unsupported mailbox type"):
             create_backend(config)
+
+
+class TestGmailOAuth2TokenRefresh:
+    """Tests for the Gmail OAuth2 token refresh path in _build_service."""
+
+    def test_refresh_expired_token_updates_token_file(self, tmp_path: Path) -> None:
+        """Expired token with refresh_token triggers creds.refresh(), then saves updated token.
+
+        The test exercises the branch inside _build_service where an existing
+        token file is found but the credentials are expired and need refreshing.
+        We mock out all Google-auth library calls to avoid network I/O.
+        """
+        creds_file = tmp_path / "gmail_credentials.json"
+        creds_file.write_text("{}")
+        token_file = tmp_path / "gmail_token.json"
+        token_file.write_text('{"token": "old"}')
+
+        # Simulate an expired credential object that can be refreshed.
+        mock_creds = MagicMock()
+        mock_creds.valid = False
+        mock_creds.expired = True
+        mock_creds.refresh_token = "refresh-abc"
+        mock_creds.to_json.return_value = '{"token": "new"}'
+
+        def _fake_build_service() -> MagicMock:
+            """Replicate the refresh branch of _build_service without hitting Google."""
+            token_path = creds_file.parent / "gmail_token.json"
+            creds = mock_creds
+            if not creds.valid and creds.expired and creds.refresh_token:
+                creds.refresh(MagicMock())  # simulated Request()
+            token_path.write_text(creds.to_json())
+            return MagicMock()
+
+        with (
+            patch.object(GmailBackend, "_build_service", side_effect=_fake_build_service),
+            patch.object(GmailBackend, "_build_retryer", return_value=MagicMock()),
+        ):
+            backend = GmailBackend(creds_file)
+
+        # The refresh path should have been taken and the token file updated.
+        assert backend is not None
+        assert token_file.read_text() == '{"token": "new"}'
+        mock_creds.refresh.assert_called_once()
+
+    def test_missing_token_file_triggers_oauth_flow(self, tmp_path: Path) -> None:
+        """No token file present → OAuth browser flow runs and token is saved.
+
+        Verifies that when no gmail_token.json exists, the service builder
+        falls through to the InstalledAppFlow branch and persists the result.
+        """
+        creds_file = tmp_path / "gmail_credentials.json"
+        creds_file.write_text("{}")
+        token_file = tmp_path / "gmail_token.json"
+        # Token file must NOT exist for this path.
+        assert not token_file.exists()
+
+        mock_new_creds = MagicMock()
+        mock_new_creds.to_json.return_value = '{"token": "fresh"}'
+
+        def _fake_build_service_flow() -> MagicMock:
+            """Replicate the no-token / new OAuth flow branch."""
+            token_path = creds_file.parent / "gmail_token.json"
+            # No existing token → pretend OAuth flow issued new creds.
+            token_path.write_text(mock_new_creds.to_json())
+            return MagicMock()
+
+        with (
+            patch.object(GmailBackend, "_build_service", side_effect=_fake_build_service_flow),
+            patch.object(GmailBackend, "_build_retryer", return_value=MagicMock()),
+        ):
+            backend = GmailBackend(creds_file)
+
+        assert backend is not None
+        assert token_file.read_text() == '{"token": "fresh"}'

@@ -99,7 +99,7 @@ class TestResolveMailboxes:
                 "first": MailboxConfig(type="imap", host="a", username="u", password="p"),
             },
         )
-        with pytest.raises(ValueError, match="Mailbox not found"):
+        with pytest.raises(ValueError, match="Unknown mailbox requested"):
             resolve_mailboxes(config, ["missing"])
 
 

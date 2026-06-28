@@ -34,7 +34,7 @@ class TestInterpolateEnvVars:
 
     def test_raises_on_missing_var(self) -> None:
         """Test error on missing env var."""
-        with pytest.raises(ValueError, match="NONEXISTENT_VAR_12345 not set"):
+        with pytest.raises(ValueError, match="Missing environment variable: NONEXISTENT_VAR_12345"):
             interpolate_env_vars("${NONEXISTENT_VAR_12345}")
 
     def test_skips_commented_lines(self) -> None:
@@ -140,7 +140,7 @@ credentials_file = "/tmp/gmail.json"
 
     def test_load_raises_on_missing_file(self, tmp_path: Path) -> None:
         """Test error when config file doesn't exist."""
-        with pytest.raises(FileNotFoundError, match="Config file not found"):
+        with pytest.raises(FileNotFoundError, match="Missing config file"):
             Config.load(tmp_path / "nonexistent.toml")
 
     def test_load_resolves_relative_credentials_path(

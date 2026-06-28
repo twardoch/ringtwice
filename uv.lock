@@ -1003,7 +1003,7 @@ requires-dist = [
     { name = "google-auth-oauthlib", specifier = ">=1.1.0" },
     { name = "html2text", specifier = ">=2024.2.26" },
     { name = "imap-tools", specifier = ">=1.8.0" },
-    { name = "mail-parser-reply", specifier = ">=1.36" },
+    { name = "mail-parser-reply", specifier = ">=1.36,<2" },
     { name = "mypy", marker = "extra == 'all'", specifier = ">=1.10.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10.0" },
     { name = "openai", specifier = ">=1.40.0" },

@@ -35,7 +35,7 @@ dependencies = [
     "google-auth-oauthlib>=1.1.0",
     # Email processing
     "html2text>=2024.2.26",
-    "mail-parser-reply>=1.36",
+    "mail-parser-reply>=1.36,<2",
     # LLM
     "openai>=1.40.0",
     # Text splitting

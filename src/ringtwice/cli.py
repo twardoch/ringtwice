@@ -429,10 +429,11 @@ class RingtwiceCLI:
         recipient: str | None = None,
         subject: str | None = None,
         legacy: bool = False,
+        dry_run: bool = False,
     ) -> None:
         """Stream emails to an LLM for parsing or extraction.
-        
-        Pulls messages matching your search criteria and feeds them to an LLM 
+
+        Pulls messages matching your search criteria and feeds them to an LLM
         alongside your prompt. Results save as JSONL files.
 
         Args:
@@ -453,6 +454,7 @@ class RingtwiceCLI:
             recipient: Comma-separated recipient addresses
             subject: Substring to match in the subject line
             legacy: Force older sync behavior instead of concurrent streaming
+            dry_run: Fetch and process but do NOT write JSONL files to disk
         """
         folder_list = split_csv(folders)
         if in_sent and not folder_list:
@@ -474,6 +476,7 @@ class RingtwiceCLI:
             sender=split_csv(sender),
             recipient=split_csv(recipient),
             subject=subject,
+            dry_run=dry_run,
         )
 
         if legacy:
@@ -512,6 +515,7 @@ def ask(
     recipient: str | None = None,
     subject: str | None = None,
     legacy: bool = False,
+    dry_run: bool = False,
 ) -> None:
     """Fire the CLI ask command directly. Kept for legacy callers."""
     cli = RingtwiceCLI()
@@ -533,6 +537,7 @@ def ask(
         recipient=recipient,
         subject=subject,
         legacy=legacy,
+        dry_run=dry_run,
     )
 
 

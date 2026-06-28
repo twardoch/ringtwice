@@ -43,6 +43,7 @@ class AskParams:
     sender: list[str] | None = None
     recipient: list[str] | None = None
     subject: str | None = None
+    dry_run: bool = False
 
 
 @dataclass
@@ -209,7 +210,7 @@ def run_ask(params: AskParams, callbacks: RunCallbacks | None = None) -> Path:
     config = Config.load(config_path)
 
     out_dir = params.output_dir or get_default_output_dir()
-    writer = OutputWriter(out_dir)
+    writer = OutputWriter(out_dir, dry_run=params.dry_run)
     llm = LLMClient(config.llm)
     processor = EmailProcessor()
 
@@ -314,7 +315,7 @@ async def run_ask_async(
     config = Config.load(config_path)
 
     out_dir = params.output_dir or get_default_output_dir()
-    writer = OutputWriter(out_dir)
+    writer = OutputWriter(out_dir, dry_run=params.dry_run)
     llm = LLMClient(config.llm)
     processor = EmailProcessor()
 
